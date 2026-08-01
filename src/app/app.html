@@ -1,28 +1,2 @@
-<h1> bai-tap-tra-sua</h1>
 <h2>{{shopname()}}</h2>
-
-@for(drink of danhSachTraSua; track drink.id){
-  <button (click) = "chonTraSua(drink)">{{drink.name}}</button>
-
-}
-<h3>
-  {{selectedDrink().name}}
-</h3>
-<p>{{selectedDrink().description}}</p>
-<p>Gia: {{selectedDrink().giaCoBan}}</p>
-<button (click) = "giamSoLy()" aria-label="Giam so ly">-</button>
-<span>{{soLy()}}</span>
-<button (click) = "tangSoLy()" aria-label="Tang so ly">+</button>
-
-<p>Tong tien: {{tongTien()}}</p>
-<pre>{{toppingCanDung() | json}}</pre>
-<p>Gia co ban: {{selectedDrink().giaCoBan | number}}</p>
-<p>Tong tien: {{tongTien() | number}}</p>
-
-@if (soLy >=5){
-  <p>Giam gia 10 khi mua tu 5 ly! Chi con: {{tongTienSauGiamGia()}}</p>
-}
-
-<h4>
-  Tong so nguyen lieu can dung: {{tongSoTopping()}}
-</h4>
+<app-drink-list></app-drink-list>

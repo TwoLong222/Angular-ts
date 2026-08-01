@@ -3,34 +3,40 @@ import { DrinkModel } from "./models";
 export const MOCK_DRINKS: DrinkModel[] = [
     {
         id: 1,
-        name: 'Tra sua tran chau duong den',
-        description: 'Tra sua dam vi',
+        name: 'Trà sữa trân châu đường đen',
+        description: 'Trà sữa đậm vị, trân châu dai ngon',
         giaCoBan: 35000,
+        imgUrl:'https://images.unsplash.com/photo-1558857563-b371033873b8?w=600',
+        isPopular: true,
         toppings: [
-            {name: 'Tran chau duong den',quantity: 2, unit: 'va'},
-            {name: 'Kem chese', quantity: 1, unit: 'lop'}
+            {name: 'Tran chau duong den',quantity: 2, unit: 'vá'},
+            {name: 'Kem chese', quantity: 1, unit: 'lớp'}
         ]
     }, 
 
     {
         id: 2,
-        name: 'Tra sua Matcha',
-        description: 'Huong vi Matcha Nhat Ban',
+        name: 'Trà sữa Matcha',
+        description: 'Hương vị Matcha Nhật Bản',
         giaCoBan: 50000,
+        imgUrl:'https://images.unsplash.com/photo-1515823064-d6e0c04616a7?w=600',
+        isPopular: true,
         toppings: [
-            {name: ' Tran chau trang', quantity: 2, unit: 'va'},
-            {name: 'Pudding trung', quantity: 2, unit: 'cai'}
+            {name: 'Trân châu trắng', quantity: 2, unit: 'vá'},
+            {name: 'Pudding trứng', quantity: 2, unit: 'cái'}
         ]
     }, 
 
     {
         id: 3,
-        name: 'Hong tra sua',
-        description: ' Tra den truyen thong',
+        name: 'Hồng trà sữa',
+        description: ' Trà đen truyền thống',
         giaCoBan: 35000,
+        imgUrl: 'https://images.unsplash.com/photo-1571934811356-5cc061b6821f?w=600',
+        isPopular: false,
         toppings: [
-            {name: ' Thach trai cay', quantity: 1, unit: 'va'},
-            {name: 'Thach dua', quantity: 1, unit: 'va'}
+            {name: 'Thạch trà sữa', quantity: 1, unit: 'vá'},
+            {name: 'Thạch dừa', quantity: 1, unit: 'vá'}
         ]
     }
 ];

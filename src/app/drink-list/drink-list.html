@@ -1,0 +1,21 @@
+<div class="drink-buttons">
+  @for (drink of danhSachTraSua(); track drink.id) {
+    <button
+      type="button"
+      (click)="chonTraSua(drink)"
+      [class.is-active]="selectedDrink().id === drink.id">
+      <span class="drink-chip">
+        {{ drink.name }}
+        @if (drink.isPopular) {
+          <span class="badge" aria-label="Món phổ biến">⭐ Phổ biến</span>
+        }
+      </span>
+
+      @if (drink.giaCoBan === maxPrice()) {
+        <span class="promo-badge" aria-label="Đắt nhất">🔥 Đắt nhất</span>
+      }
+    </button>
+  }
+</div>
+
+<app-drink-detail [drink]="selectedDrink()" />

@@ -1,0 +1,124 @@
+:host {
+  display: block;
+}
+
+/* Khung bọc bên ngoài xếp dọc bằng flexbox */
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1.5rem;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  max-width: 400px;
+  background-color: #fff;
+}
+
+.drink-img {
+  max-width: 300px;
+  width: 100%;
+  border-radius: 8px;
+  align-self: center;
+}
+
+/* Thứ bậc thị giác: Tên trà sữa to và đậm */
+.drink-name {
+  font-size: 1.8rem;
+  font-weight: 800;
+  margin: 0;
+  color: #333;
+}
+
+.price-tier {
+  font-style: italic;
+  color: #777;
+  margin: -0.5rem 0 0 0;
+}
+
+.drink-price {
+  font-size: 1.2rem;
+  color: #d9534f;
+  margin: 0;
+  font-weight: bold;
+}
+
+/* Cụm số ly nằm ngang và căn giữa */
+.qty-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 0.5rem 0;
+}
+
+.qty-row button {
+  width: 40px;
+  height: 40px;
+  font-size: 1.5rem;
+  border-radius: 50%;
+  border: 1px solid #ccc;
+  background-color: #f8f9fa;
+  cursor: pointer;
+}
+
+.qty-row button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.qty-text {
+  font-size: 1.2rem;
+  font-weight: bold;
+  min-width: 50px;
+  text-align: center;
+}
+
+.total-row {
+  background-color: #f1f8ff;
+  padding: 1rem;
+  border-radius: 8px;
+  border: 1px solid #b8daff;
+}
+
+.total-price {
+  font-size: 1.3rem;
+  font-weight: bold;
+  margin: 0;
+  color: #004085;
+}
+
+.discount-text {
+  color: #28a745;
+  font-weight: bold;
+  margin: 0.5rem 0 0 0;
+}
+
+.topping-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  border-top: 2px solid #f0f0f0;
+}
+
+.topping-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.75rem 0.5rem;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+/* Tô màu dòng so le (Thử thách D4) */
+.row-alt {
+  background-color: #fcfcfc;
+}
+
+.empty-state {
+  color: #999;
+  font-style: italic;
+  justify-content: center;
+}
+
+.topping-summary {
+  text-align: right;
+  margin-top: 1rem;
+}

@@ -1,0 +1,70 @@
+:host {
+  display: block;
+  font-family: 'Segoe UI', Arial, sans-serif;
+  color: #2f2a24;
+}
+
+.drink-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.drink-buttons button {
+  border: 1px solid #f0c98c;
+  background: linear-gradient(135deg, #fff8eb 0%, #ffe7c2 100%);
+  color: #8b4b00;
+  border-radius: 999px;
+  padding: 10px 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+}
+
+.drink-buttons button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.drink-buttons button.is-active {
+  background: linear-gradient(135deg, #ff8c00 0%, #ffb347 100%);
+  color: #fff;
+  border-color: #ff8c00;
+}
+
+.drink-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: #fff0d7;
+  color: #a14f00;
+  font-size: 0.78rem;
+  font-weight: 700;
+  margin-left: 6px;
+}
+
+.promo-badge {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 6px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: #ff4d4f;
+  color: white;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+app-drink-detail {
+  display: block;
+  margin-top: 20px;
+}
