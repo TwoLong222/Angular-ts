@@ -1,0 +1,58 @@
+PH?N A – Lý thuy?t
+1. Phân bi?t {{ }} và []:
+o {{ }} (Interpolation) dùng ?? chuy?n ??i d? li?u thành ch? thu?n (chu?i) và in ra màn hình. 
+o [] (Property binding) dùng ?? g?n d? li?u ho?c thu?c tính t? Class TypeScript vào thu?c tính c?a th? HTML (gi? nguyên ki?u d? li?u th?t nh? boolean, object). 
+2. Vì sao <button disabled="{{ isLocked() }}"> là sai, còn <button [disabled]="isLocked()"> là ?úng?
+o ?ây là b?y gán vào thu?c tính b?ng {{ }}. Vi?c gán disabled="{{ isLocked() }}" là sai cú pháp vì disabled c?n nh?n giá tr? boolean tr?c ti?p thay vì chu?i. Cú pháp [disabled]="isLocked()" là ?úng vì nó s? d?ng property binding ?? truy?n tr?c ti?p giá tr? boolean t? hàm. 
+3. T?i sao src có ngo?c vuông mà width thì không?
+o Theo quy t?c, có [] thì bên trong là code TypeScript, còn không có [] thì bên trong là ch? thu?n. ? ?ây [src] l?y giá tr? ??ng t? bi?n drink().imgUrl, trong khi width="300" ch? là m?t giá tr? ch? thu?n t?nh. 
+4. Ba b??c l?ng component con bên trong component cha:
+o B??c 1: Import class con vào file c?a component cha. 
+o B??c 2: Thêm class con vào m?ng imports c?a component cha. 
+o B??c 3: Dùng selector c?a component con trong template (HTML). 
+o N?u thi?u b??c, ??c bi?t là quên thêm vào m?ng imports, Angular s? không nh?n di?n ???c component con và báo l?i. 
+5. V? trí th? m?c c?a Component:
+o Component App là component g?c (Root) nên n?m th?ng trong src/app/, còn các component khác (nh? drink-list) ???c t? ch?c vào các th? m?c riêng ?? d? qu?n lý các file .ts, .html và .css thu?c v? component ?ó. 
+6. T?i sao import thay ??i t? ./models thành ../models?
+o Vì khi code chuy?n xu?ng th? m?c drink-list/, v? trí file ?ã ?i sâu vào 1 c?p. Do ?ó, c?n dùng ../models ?? ???ng d?n t??ng ??i ?i lùi ra 1 c?p v? l?i th? m?c g?c src/app/. 
+7. B?o m?t c?a input() so v?i signal:
+o ??i v?i input() (nh?n d? li?u t? cha), KHÔNG ???c ??t protected mà CH? dùng readonly ?? component cha có quy?n truy c?p và truy?n d? li?u. Trong khi ?ó, signal là state do component t? qu?n lý nên c?n ??t protected ?? ?óng gói. 
+8. Phân bi?t [drink]="selectedDrink()" và [drink]="selectedDrink":
+o Cú pháp ?úng là [drink]="selectedDrink()" vì ?ây là hành ??ng truy?n giá tr? (ph?i có d?u ngo?c ?? l?y giá tr? t? signal). Vi?t [drink]="selectedDrink" là m?c b?y "Truy?n signal thay vì giá tr?". 
+9. C? ch? CSS trong Angular:
+o CSS vi?t trong drink-detail.css KHÔNG ?nh h??ng t?i th? <h2> ? các component khác vì CSS trong Angular ch? ?nh h??ng t?i template n?i b? c?a component ?ó (không rò r? ra ngoài). 
+10. Khác bi?t gi?a @if và CSS display: none:
+o Cú pháp @if xóa h?n th? kh?i DOM, khác v?i display: none ch? ?n th? ?i (nh?ng v?n t?n t?i trong DOM). ?i?u này quan tr?ng khi th? b? ?n ch?a các logic n?ng ho?c component ph?c t?p, @if s? giúp ti?t ki?m tài nguyên h? th?ng do không b? render d? th?a. 
+11. Vai trò c?a track trong @for:
+o track yêu c?u m?t giá tr? duy nh?t và không ??i ?? giúp Angular t?i ?u hóa vi?c theo dõi và c?p nh?t danh sách. Dùng track $index th??ng là l?a ch?n t? (ch? dùng khi ???ng cùng) vì index có th? b? sai l?ch khi danh sách thay ??i (thêm, xóa, s?p x?p). 
+12. Import cho @for và @if:
+o Không c?n import gì c? vì @for và @if là cú pháp tích h?p s?n. Ngày x?a, *ngFor và *ngIf là ?? c?a th? h? c?, c?n ph?i import NgFor/NgIf, nh?ng ?ã b? khai t? ? phiên b?n 20. 
+PH?N B – Tìm l?i trong code
+* L?i s? 1:
+o L?i: Gán vào thu?c tính (property) b?ng {{ }}. 
+o S?a l?i: <button type="button" [disabled]="soLy() === 1">-</button>. 
+* L?i s? 2:
+o L?i: Thi?u d?u = khi gán bi?n trong class.
+o S?a l?i: readonly drink = input.required<DrinkModel>();. 
+* L?i s? 3:
+o L?i: Quên thêm component con (DrinkDetail) vào m?ng imports. 
+o S?a l?i: S?a dòng imports: [], thành imports: [DrinkDetail],. 
+* L?i s? 4:
+o L?i: Truy?n signal thay vì giá tr? (thi?u d?u () sau signal). 
+o S?a l?i: <app-drink-detail [drink]="selectedDrink()" />. 
+* L?i s? 5:
+o L?i: ??t protected cho input(). 
+o S?a l?i: B? ch? protected ?i, ch? gi? l?i readonly drink = input.required<DrinkModel>();. 
+* L?i s? 6:
+o L?i: Cú pháp @for b? thi?u track. 
+o S?a l?i: @for (topping of toppingCanDung(); track topping.name) { (ho?c m?t thu?c tính thay th? tùy ch?n). 
+* L?i s? 7:
+o L?i: Import NgIf th?a thãi (Không import gì c? v?i cú pháp ?i?u khi?n m?i). 
+o S?a l?i: Xóa dòng import { NgIf } from '@angular/common'; và xóa NgIf kh?i m?ng imports: []. 
+* L?i s? 8:
+o L?i: Sai toán t? so sánh trong ?i?u ki?n (b?y m?t d?u = ho?c thi?u toán t? so sánh). 
+o S?a l?i: Thay vì id drink.id, vi?t ?úng là [class.is-active]="selectedDrink().id === drink.id". 
+* L?i s? 9:
+o L?i: Quên d?u ngo?c () sau signal trong vòng l?p @for. 
+o S?a l?i: @for (drink of drinks(); track drink.id) {. 
+
