@@ -1,7 +1,28 @@
 
 :host {
   display: block;
-  max-width: 640px;
+}
+
+.page-shell {
+  max-width: 1280px;
   margin: 0 auto;
-  padding: 2rem 1.25rem;
+  padding: 2.5rem 1.25rem 4rem;
+}
+
+.page-title {
+  margin: 0 0 1.5rem;
+  font-size: clamp(1.8rem, 3vw, 2.4rem);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--chu-chinh);
+}
+
+.page-title::after {
+  content: "";
+  display: block;
+  width: 78px;
+  height: 4px;
+  margin-top: 0.6rem;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--cam), var(--cam-nhat));
 }

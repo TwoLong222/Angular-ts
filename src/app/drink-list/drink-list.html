@@ -1,6 +1,9 @@
-<div class="search-container">
-  <label for="searchInput" class="search-label">Tìm món:</label>
-  <input 
+<div class="search-card">
+  <div class="toolbar-row">
+    <label for="searchInput" class="search-label">🔎 Tìm món</label>
+    <a routerLink="/drinks/new" class="add-link">+ Thêm món</a>
+  </div>
+  <input
     id="searchInput"
     type="search"
     class="search-input"
@@ -8,29 +11,25 @@
     (ngModelChange)="keyword.set($event)"
     placeholder="Nhập tên món hoặc mô tả..."
   />
-  
- 
-  <div style="margin-top: 10px; display: flex; gap: 10px;">
-    <button (click)="sortOrder.set('asc')">Giá tăng dần</button>
-    <button (click)="sortOrder.set('desc')">Giá giảm dần</button>
-    <button (click)="sortOrder.set('none')">Mặc định</button>
+
+  <div class="sort-actions">
+    <button type="button" class="sort-btn" (click)="sortOrder.set('asc')">Giá tăng dần</button>
+    <button type="button" class="sort-btn" (click)="sortOrder.set('desc')">Giá giảm dần</button>
+    <button type="button" class="sort-btn" (click)="sortOrder.set('none')">Mặc định</button>
   </div>
 </div>
 
+<p class="result-count">Tìm thấy {{ resultCount() }} món</p>
 
-<p style="font-weight: bold; color: var(--cam-dam);">
-  Tìm thấy {{ resultCount() }} món
-</p>
-
-
-<ul class ="drink-grid">
-  @for (drink of filteredDrinks(); track drink.id){
+<ul class="drink-grid">
+  @for (drink of filteredDrinks(); track drink.id) {
     <li>
-      <a [routerLink]="['/drinks', drink.id]" class = "drink-btn">
-          {{drink.name}}
+      <a [routerLink]="['/drinks', drink.id]" class="drink-btn">
+        <img [src]="drink.imgUrl" [alt]="drink.name" class="drink-thumb" />
+        <span>{{ drink.name }}</span>
       </a>
     </li>
-  }@empty {
-    <p class = "empty-message">Không tìm thấy món ăn nào khớp với từ khóa</p>
+  } @empty {
+    <p class="empty-message">Không tìm thấy món ăn nào khớp với từ khóa</p>
   }
 </ul>

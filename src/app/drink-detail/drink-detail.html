@@ -1,61 +1,68 @@
 <a routerLink="/drinks" class="back-link">← Quay lại danh sách</a>
 
-
 @if (selectedDrink(); as drink) {
   <div class="card">
- 
-    <img [src]="drink.imgUrl" [alt]="'Ảnh ' + drink.name" style="max-width: 300px;" class="drink-img">
+    <div class="hero">
+      <img [src]="drink.imgUrl" [alt]="'Ảnh ' + drink.name" class="drink-img">
 
-    <h2 class="drink-name">{{ drink.name }}</h2>
-    <button type="button" (click)="toggleFav(drink.id)" style="margin-bottom: 15px;">
-      {{ drink.isPopular ? '❤️ Đã yêu thích (Bỏ)' : '🤍 Thêm vào yêu thích' }}
-      <button type="button" (click)="deleteItem(drink.id)" style="margin-bottom: 15px; color: red;">
-      🗑️ Xóa món này
-    </button>
-    </button>
-    <p class="price-tier">
-      Phân khúc:
-      @if (drink.giaCoBan < 40000) {
-        Bình dân
-      } @else if (drink.giaCoBan <= 50000) {
-        Tiêu chuẩn
-      } @else {
-        Cao cấp
-      }
-    </p>
+      <div>
+        <h2 class="drink-name">{{ drink.name }}</h2>
 
-    <p class="drink-price">Giá cơ bản: {{ drink.giaCoBan }}₫</p>
+        <div class="actions">
+          <button type="button" class="action-btn" (click)="toggleFav(drink.id)">
+            {{ drink.isPopular ? '❤️ Đã yêu thích' : '🤍 Thêm vào yêu thích' }}
+          </button>
+          <button type="button" class="action-btn delete" (click)="deleteItem(drink.id)">
+            🗑️ Xóa món này
+          </button>
+        </div>
 
-    <div class="qty-row">
-      <button type="button" (click)="giamSoLy()" [disabled]="soLy() === 1" aria-label="Giảm số ly">-</button>
-      <span class="qty-text">{{ soLy() }} ly</span>
-      <button type="button" (click)="tangSoLy()" aria-label="Tăng số ly">+</button>
+        <p class="price-tier">
+          Phân khúc:
+          @if (drink.giaCoBan < 40000) {
+            Bình dân
+          } @else if (drink.giaCoBan <= 50000) {
+            Tiêu chuẩn
+          } @else {
+            Cao cấp
+          }
+        </p>
+
+        <p class="drink-price">Giá cơ bản: {{ drink.giaCoBan }}₫</p>
+
+        <div class="qty-row">
+          <button type="button" (click)="giamSoLy()" [disabled]="soLy() === 1" aria-label="Giảm số ly">-</button>
+          <span class="qty-text">{{ soLy() }} ly</span>
+          <button type="button" (click)="tangSoLy()" aria-label="Tăng số ly">+</button>
+        </div>
+      </div>
     </div>
 
     <div class="total-row">
       <p class="total-price">Tổng tiền: {{ tongTien() }}₫</p>
-      
+
       @if (soLy() >= 5) {
-        <p style="color: green; font-weight: bold;">Đã giảm 10%! Còn lại: {{ tongTienSauGiamGia() }}₫</p>
+        <p class="discount-text">Đã giảm 10%! Còn lại: {{ tongTienSauGiamGia() }}₫</p>
       }
     </div>
 
-    <h3>Danh sách Topping</h3>
-    <ul class="topping-list">
-      @for (topping of toppingCanDung(); track topping.name; let i = $index; let even = $even) {
-        <li class="topping-item" [class.row-alt]="even" style="padding: 5px;">
-          <span>{{ i + 1 }}. {{ topping.name }}</span> - 
-          <span>{{ topping.quantity }} {{ topping.unit }}</span>
-        </li>
-      } @empty {
-        <li class="topping-item empty-state">Chưa có topping nào.</li>
-      }
-    </ul>
-    
-    <p><strong>Tổng số lượng topping:</strong> {{ tongSoTopping() }}</p>
+    <div>
+      <h3>Danh sách Topping</h3>
+      <ul class="topping-list">
+        @for (topping of toppingCanDung(); track topping.name; let i = $index; let even = $even) {
+          <li class="topping-item" [class.row-alt]="even">
+            <span>{{ i + 1 }}. {{ topping.name }}</span>
+            <span>{{ topping.quantity }} {{ topping.unit }}</span>
+          </li>
+        } @empty {
+          <li class="topping-item empty-state">Chưa có topping nào.</li>
+        }
+      </ul>
+    </div>
+
+    <p class="summary-block"><strong>Tổng số lượng topping:</strong> {{ tongSoTopping() }}</p>
   </div>
 } @else {
-
   <div class="not-found-box">
     <p>Không tìm thấy món này.</p>
   </div>

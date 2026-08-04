@@ -1,5 +1,4 @@
-<a routerLink="/drinks" class="back-link">Quay lại</a>
-
+<a routerLink="/drinks" class="back-link">← Quay lại</a>
 
 <form [formGroup]="drinkForm" (ngSubmit)="save()" class="drink-form">
   <div class="form-group">
@@ -14,8 +13,27 @@
 
   <div class="form-group">
     <label for="price">Giá cơ bản</label>
-   
-    <input id="price" type="number" formControlName="price" />
+    <input id="price" type="number" formControlName="giaCoBan" />
+  </div>
+
+  <div class="form-group">
+    <label for="img">Ảnh món</label>
+    <input id="img" type="url" formControlName="imgUrl" placeholder="https://..." />
+  </div>
+
+  <div class="form-group">
+    <label>Topping</label>
+    <div formArrayName="toppings">
+      @for (topping of toppings.controls; track topping; let i = $index) {
+        <div [formGroupName]="i" class="topping-row">
+          <input type="text" formControlName="name" placeholder="Tên topping" />
+          <input type="number" formControlName="quantity" placeholder="Số lượng" />
+          <input type="text" formControlName="unit" placeholder="Đơn vị" />
+          <button type="button" class="btn-remove" (click)="removeTopping(i)">Xóa</button>
+        </div>
+      }
+    </div>
+    <button type="button" class="btn-add" (click)="addTopping()">+ Thêm topping</button>
   </div>
 
   <button type="submit" class="btn-save">Lưu</button>
