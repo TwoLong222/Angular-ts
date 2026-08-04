@@ -1,18 +1,27 @@
-import { Component, computed, input, signal } from '@angular/core';
-import { DrinkModel, Topping } from '../models';
+import { Component, computed,signal, inject} from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { DrinkService } from '../drink-service';
+import { ActivatedRoute, RouterLink, Router } from '@angular/router';
 
 @Component({
   selector: 'app-drink-detail',
-  standalone: true,
-  imports: [],
+  imports: [RouterLink],
   templateUrl: './drink-detail.html',
   styleUrl: './drink-detail.css',
 })
 export class DrinkDetail {
-  readonly drink = input.required<DrinkModel>();
-  protected readonly soLy = signal<number>(1);
+  private readonly drinkService = inject(DrinkService);
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
+  private readonly params = toSignal(this.route.paramMap);
 
-  protected readonly tongTien = computed(() => this.drink().giaCoBan * this.soLy());
+  protected readonly selectedDrink = computed(() =>{
+    const id = Number(this.params()?.get('id'));
+    return this.drinkService.getDrinkById(id);
+  });
+    
+  protected readonly soLy = signal<number>(1);
+  protected readonly tongTien = computed(() => (this.selectedDrink()?.giaCoBan || 0) * this.soLy());
 
   protected readonly tongTienSauGiamGia = computed(() => {
     const tienGoc = this.tongTien();
@@ -23,12 +32,12 @@ export class DrinkDetail {
   });
 
   protected readonly toppingCanDung = computed(() =>
-    this.drink().toppings.map((topping) => ({
-      name: topping.name,
-      quantity: topping.quantity * this.soLy(),
-      unit: topping.unit,
-    }))
-  );
+  (this.selectedDrink()?.toppings || []).map((topping) => ({
+    name: topping.name,
+    quantity: topping.quantity * this.soLy(),
+    unit: topping.unit,
+  }))
+);
 
   protected readonly tongSoTopping = computed(() =>
     this.toppingCanDung().reduce((tong, hienTai) => tong + hienTai.quantity, 0)
@@ -66,6 +75,16 @@ export class DrinkDetail {
     }
 
     return '🧁';
+  }
+  
+  protected deleteItem(id: number): void {
+    this.drinkService.deleteDrink(id);
+    this.router.navigate(['/drinks']); 
+  }
+
+ 
+  protected toggleFav(id: number): void {
+    this.drinkService.toggleFavorite(id);
   }
 }
 

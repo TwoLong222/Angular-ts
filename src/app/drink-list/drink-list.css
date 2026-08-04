@@ -1,70 +1,74 @@
-:host {
-  display: block;
-  font-family: 'Segoe UI', Arial, sans-serif;
-  color: #2f2a24;
+
+.search-container {
+  margin-bottom: 2rem;
 }
 
-.drink-buttons {
+.search-label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+  color: var(--chu-nhat);
+  font-weight: bold;
+}
+
+.search-input {
+  width: 100%; 
+  box-sizing: border-box; 
+  padding: 0.75rem 1rem;
+  border: 2px solid var(--kem-dam);
+  border-radius: 8px;
+  font-size: 1rem;
+  outline: none;
+}
+
+.search-input:focus {
+  border-color: var(--cam); 
+}
+
+
+.drink-grid {
   display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  margin-bottom: 20px;
+  flex-wrap: wrap; 
+  gap: 1rem;       
+  list-style: none; 
+  padding: 0;
+  margin: 0;
 }
 
-.drink-buttons button {
-  border: 1px solid #f0c98c;
-  background: linear-gradient(135deg, #fff8eb 0%, #ffe7c2 100%);
-  color: #8b4b00;
-  border-radius: 999px;
-  padding: 10px 16px;
-  font-weight: 600;
+.drink-btn {
+  padding: 0.75rem 1.5rem;
+  border: 1px solid var(--kem-dam);
+  border-radius: 8px;
+  background-color: var(--kem-nhat);
+  color: var(--chu-chinh);
   cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+  font-size: 1rem;
+  transition: all 0.2s ease;
 }
 
-.drink-buttons button:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+.drink-btn:hover {
+  background-color: var(--cam-nhat);
 }
 
-.drink-buttons button.is-active {
-  background: linear-gradient(135deg, #ff8c00 0%, #ffb347 100%);
-  color: #fff;
-  border-color: #ff8c00;
+
+.drink-btn.is-active {
+  background-color: var(--cam);
+  color: #ffffff;
+  border-color: var(--cam-dam);
+  font-weight: bold;
 }
 
-.drink-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
+.empty-message {
+  color: var(--chu-nhat);
+  font-style: italic;
+  padding: 1rem 0;
 }
 
-.badge {
-  display: inline-flex;
-  align-items: center;
-  padding: 4px 8px;
-  border-radius: 999px;
-  background: #fff0d7;
-  color: #a14f00;
-  font-size: 0.78rem;
-  font-weight: 700;
-  margin-left: 6px;
+a.drink-btn{
+  display: inline-block;
+  text-decoration: none;
+  color: var(--chu-chinh, #3a332c);
 }
-
-.promo-badge {
-  display: inline-flex;
-  align-items: center;
-  margin-left: 6px;
-  padding: 3px 8px;
-  border-radius: 999px;
-  background: #ff4d4f;
-  color: white;
-  font-size: 0.72rem;
-  font-weight: 700;
-}
-
-app-drink-detail {
-  display: block;
-  margin-top: 20px;
+a.drink-btn:hover{
+    text-decoration: none;
 }

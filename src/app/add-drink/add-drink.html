@@ -1,0 +1,22 @@
+<a routerLink="/drinks" class="back-link">Quay lại</a>
+
+
+<form [formGroup]="drinkForm" (ngSubmit)="save()" class="drink-form">
+  <div class="form-group">
+    <label for="name">Tên món</label>
+    <input id="name" type="text" formControlName="name" />
+  </div>
+
+  <div class="form-group">
+    <label for="desc">Mô tả</label>
+    <input id="desc" type="text" formControlName="description" />
+  </div>
+
+  <div class="form-group">
+    <label for="price">Giá cơ bản</label>
+   
+    <input id="price" type="number" formControlName="price" />
+  </div>
+
+  <button type="submit" class="btn-save">Lưu</button>
+</form>

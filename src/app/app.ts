@@ -1,15 +1,11 @@
-import { Component, signal } from '@angular/core';
-import { DrinkList } from './drink-list/drink-list';
+import { Component } from '@angular/core';
+import {RouterOutlet} from '@angular/router';
 
 @Component({
   selector: 'app-root',
-  standalone: true,
-  imports: [DrinkList],
-  templateUrl: './app.html',
-  styleUrl: './app.css',
+  imports: [RouterOutlet],
+  template: '<router-outlet></router-outlet>'
 })
 
 export class App {
-  protected readonly title = signal('bai-tap-tra-sua');
-  protected readonly shopname = signal('quan tra sua Angular');
 }
