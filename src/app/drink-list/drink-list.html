@@ -1,35 +1,62 @@
-<div class="search-card">
-  <div class="toolbar-row">
-    <label for="searchInput" class="search-label">🔎 Tìm món</label>
-    <a routerLink="/drinks/new" class="add-link">+ Thêm món</a>
-  </div>
-  <input
-    id="searchInput"
-    type="search"
-    class="search-input"
-    [ngModel]="keyword()"
-    (ngModelChange)="keyword.set($event)"
-    placeholder="Nhập tên món hoặc mô tả..."
-  />
+<div class="drink-list-page">
+  <mat-card class="filter-card">
+    <div class="filter-row">
+      <mat-form-field appearance="outline" class="search-field">
+        <mat-label>Tìm món</mat-label>
+        <input matInput type="text" placeholder="Nhập tên trà sữa..." [ngModel]="keyword()" (ngModelChange)="keyword.set($event)">
+        <button mat-icon-button matSuffix aria-label="Search">
+          <mat-icon>search</mat-icon>
+        </button>
+      </mat-form-field>
 
-  <div class="sort-actions">
-    <button type="button" class="sort-btn" (click)="sortOrder.set('asc')">Giá tăng dần</button>
-    <button type="button" class="sort-btn" (click)="sortOrder.set('desc')">Giá giảm dần</button>
-    <button type="button" class="sort-btn" (click)="sortOrder.set('none')">Mặc định</button>
-  </div>
-</div>
-
-<p class="result-count">Tìm thấy {{ resultCount() }} món</p>
-
-<ul class="drink-grid">
-  @for (drink of filteredDrinks(); track drink.id) {
-    <li>
-      <a [routerLink]="['/drinks', drink.id]" class="drink-btn">
-        <img [src]="drink.imgUrl" [alt]="drink.name" class="drink-thumb" />
-        <span>{{ drink.name }}</span>
+      <a mat-flat-button color="primary" routerLink="/add-drink" class="add-button">
+        <mat-icon>add</mat-icon>
+        Thêm món
       </a>
-    </li>
+    </div>
+
+    <div class="filter-row filter-row--wrap">
+      <mat-form-field appearance="outline" class="sort-field">
+        <mat-label>Sắp xếp theo giá</mat-label>
+        <mat-select [value]="sortOrder()" (selectionChange)="sortOrder.set($event.value)">
+          <mat-option value="none">Mặc định</mat-option>
+          <mat-option value="asc">Giá tăng dần ⬆️</mat-option>
+          <mat-option value="desc">Giá giảm dần ⬇️</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-chip-listbox aria-label="Lọc trạng thái" class="filter-chips">
+        <mat-chip-option [selected]="filter() === 'all'" (click)="filter.set('all')">
+          Tất cả
+        </mat-chip-option>
+        <mat-chip-option color="accent" [selected]="filter() === 'popular'" (click)="filter.set('popular')">
+          Phổ biến 🌟
+        </mat-chip-option>
+      </mat-chip-listbox>
+    </div>
+  </mat-card>
+
+  <div class="result-header">
+    <p class="result-count">Tìm thấy {{ resultCount() }} món</p>
+  </div>
+
+  <mat-nav-list style="background: white; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); padding: 8px 0;">
+  @for (drink of filteredDrinks(); track drink.id) {
+    <a mat-list-item [routerLink]="['/drinks', drink.id]">
+      
+      <!-- SỬA Ở ĐÂY: Thêm matListItemAvatar và object-fit để ảnh không bị méo -->
+      <img matListItemAvatar [src]="drink.imgUrl" style="object-fit: cover;" alt="Trà sữa" />
+      
+      <span matListItemTitle>{{ drink.name }}</span>
+      
+      <button mat-icon-button matListItemMeta color="warn" (click)="deleteDrink(drink.id); $event.preventDefault(); $event.stopPropagation()">
+        <mat-icon>delete</mat-icon>
+      </button>
+    </a>
   } @empty {
-    <p class="empty-message">Không tìm thấy món ăn nào khớp với từ khóa</p>
+    <p style="padding: 16px; text-align: center; color: gray; font-style: italic;">
+      Không tìm thấy món ăn nào khớp với từ khóa
+    </p>
   }
-</ul>
+</mat-nav-list>
+</div>

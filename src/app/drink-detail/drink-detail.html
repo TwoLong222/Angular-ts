@@ -1,69 +1,53 @@
-<a routerLink="/drinks" class="back-link">← Quay lại danh sách</a>
+<mat-card style="max-width: 600px; margin: 24px auto; border-radius: 24px; box-shadow: 0 8px 24px rgba(0,0,0,0.08);">
+  
+  
+  <img mat-card-image [src]="drink.imgUrl" [alt]="drink.name" style="object-fit: cover; max-height: 300px; border-top-left-radius: 24px; border-top-right-radius: 24px;">
 
-@if (selectedDrink(); as drink) {
-  <div class="card">
-    <div class="hero">
-      <img [src]="drink.imgUrl" [alt]="'Ảnh ' + drink.name" class="drink-img">
+  <mat-card-header style="margin-top: 16px;">
+    <mat-card-title style="font-size: 1.8rem; font-weight: 800;">{{ drink.name }}</mat-card-title>
+    <mat-card-subtitle style="font-size: 1rem;">{{ drink.description }}</mat-card-subtitle>
+  </mat-card-header>
 
-      <div>
-        <h2 class="drink-name">{{ drink.name }}</h2>
-
-        <div class="actions">
-          <button type="button" class="action-btn" (click)="toggleFav(drink.id)">
-            {{ drink.isPopular ? '❤️ Đã yêu thích' : '🤍 Thêm vào yêu thích' }}
-          </button>
-          <button type="button" class="action-btn delete" (click)="deleteItem(drink.id)">
-            🗑️ Xóa món này
-          </button>
-        </div>
-
-        <p class="price-tier">
-          Phân khúc:
-          @if (drink.giaCoBan < 40000) {
-            Bình dân
-          } @else if (drink.giaCoBan <= 50000) {
-            Tiêu chuẩn
-          } @else {
-            Cao cấp
-          }
-        </p>
-
-        <p class="drink-price">Giá cơ bản: {{ drink.giaCoBan }}₫</p>
-
-        <div class="qty-row">
-          <button type="button" (click)="giamSoLy()" [disabled]="soLy() === 1" aria-label="Giảm số ly">-</button>
-          <span class="qty-text">{{ soLy() }} ly</span>
-          <button type="button" (click)="tangSoLy()" aria-label="Tăng số ly">+</button>
-        </div>
-      </div>
+  <mat-card-content style="padding: 16px;">
+    <p style="font-size: 1.4rem; font-weight: bold; color: var(--cam-dam); margin-top: 8px;">
+      Giá: {{ drink.giaCoBan }}đ
+    </p>
+    
+    
+    <div style="display: flex; align-items: center; justify-content: center; gap: 24px; margin: 32px 0; padding: 16px; background: #f9fafb; border-radius: 16px;">
+      <button mat-mini-fab color="accent" aria-label="Giảm số lượng" (click)="giamSoLy()" [disabled]="soLy() <= 1">
+        <mat-icon>remove</mat-icon>
+      </button>
+      <span aria-live="polite" style="font-size: 1.5rem; font-weight: bold;">{{ soLy() }}</span>
+      <button mat-mini-fab color="primary" aria-label="Tăng số lượng" (click)="tangSoLy()">
+        <mat-icon>add</mat-icon>
+      </button>
     </div>
 
-    <div class="total-row">
-      <p class="total-price">Tổng tiền: {{ tongTien() }}₫</p>
+    <p style="font-size: 1.2rem; font-weight: 600; margin-bottom: 16px; color: #333; text-align: center;">
+      Tổng giá: {{ tongTien() | number:'1.0-0' }}đ
+    </p>
 
-      @if (soLy() >= 5) {
-        <p class="discount-text">Đã giảm 10%! Còn lại: {{ tongTienSauGiamGia() }}₫</p>
-      }
-    </div>
+    <h3 style="margin-top: 24px; font-weight: bold; border-bottom: 2px solid #f1f5f9; padding-bottom: 8px;">Topping</h3>
+    <mat-list>
+      
+      <mat-list-item>
+        <span matListItemTitle>Trân châu đen</span>
+      </mat-list-item>
+      <mat-list-item>
+        <span matListItemTitle>Thạch trái cây</span>
+      </mat-list-item>
+    </mat-list>
+  </mat-card-content>
 
-    <div>
-      <h3>Danh sách Topping</h3>
-      <ul class="topping-list">
-        @for (topping of toppingCanDung(); track topping.name; let i = $index; let even = $even) {
-          <li class="topping-item" [class.row-alt]="even">
-            <span>{{ i + 1 }}. {{ topping.name }}</span>
-            <span>{{ topping.quantity }} {{ topping.unit }}</span>
-          </li>
-        } @empty {
-          <li class="topping-item empty-state">Chưa có topping nào.</li>
-        }
-      </ul>
-    </div>
+  
+  <mat-card-actions align="end" style="padding: 16px; border-top: 1px solid #f1f5f9;">
+    
+    <button mat-button color="warn" style="margin-right: auto;">Xóa món</button>
+    
+    <a mat-stroked-button routerLink="/drinks">
+      <mat-icon>arrow_back</mat-icon> Quay lại
+    </a>
+  </mat-card-actions>
 
-    <p class="summary-block"><strong>Tổng số lượng topping:</strong> {{ tongSoTopping() }}</p>
-  </div>
-} @else {
-  <div class="not-found-box">
-    <p>Không tìm thấy món này.</p>
-  </div>
-}
+</mat-card>

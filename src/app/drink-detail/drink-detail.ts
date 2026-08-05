@@ -1,15 +1,22 @@
-import { Component, computed,signal, inject} from '@angular/core';
+import { Component, computed, signal, inject } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { DrinkService } from '../drink-service';
 import { ActivatedRoute, RouterLink, Router } from '@angular/router';
+import { MatCardModule } from '@angular/material/card';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatListModule } from '@angular/material/list';
 
 @Component({
   selector: 'app-drink-detail',
-  imports: [RouterLink],
+  standalone: true,
+  imports: [CommonModule, RouterLink, MatCardModule, MatButtonModule, MatIconModule, MatListModule],
   templateUrl: './drink-detail.html',
   styleUrl: './drink-detail.css',
 })
 export class DrinkDetail {
+  drink: any;
   private readonly drinkService = inject(DrinkService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
@@ -20,6 +27,11 @@ export class DrinkDetail {
     return this.drinkService.getDrinkById(id);
   });
     
+  constructor(){
+    
+    const id = Number(this.route.snapshot.paramMap.get('id'));
+    this.drink = this.drinkService.getDrinkById(id);
+  }
   protected readonly soLy = signal<number>(1);
   protected readonly tongTien = computed(() => (this.selectedDrink()?.giaCoBan || 0) * this.soLy());
 

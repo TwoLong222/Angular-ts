@@ -1,4 +1,24 @@
-<div class="page-shell">
-  <h2 class="page-title">{{ shopname() }}</h2>
-  <app-drink-list></app-drink-list>
-</div>
+<mat-sidenav-container>
+  <mat-sidenav
+    #drawer
+    [mode]="isMobile() ? 'over' : 'side'"
+    [opened]="!isMobile()"
+  >
+    <mat-nav-list>...</mat-nav-list>
+  </mat-sidenav>
+  <a mat-button routerLink="/drinks">Danh sách</a>
+  <a mat-flat-button color="primary" routerLink="/add-drink" style="padding: 0 1rem; min-height: 40px; border-radius: 8px;">
+    <mat-icon>add</mat-icon>
+    Thêm món
+  </a>
+
+  <mat-sidenav-content>
+    <mat-toolbar>
+      <button matIconButton (click)="drawer.toggle()" aria-label="Mở menu">
+        <mat-icon>menu</mat-icon>
+      </button>
+      <span>Quầy Trà Sữa</span>
+    </mat-toolbar>
+    <main><router-outlet /></main>
+  </mat-sidenav-content>
+</mat-sidenav-container>

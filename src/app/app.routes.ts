@@ -8,6 +8,7 @@ import { NotFound } from './not-found/not-found';
 export const routes: Routes = [
     {path: 'drinks', component: DrinkList},
     {path: 'drinks/new', component: AddDrink},
+    {path: 'add-drink', component: AddDrink},
     {path: 'drinks/:id', component: DrinkDetail},
     {path:'', redirectTo: 'drinks', pathMatch:'full'},
 

@@ -1,40 +1,44 @@
-<a routerLink="/drinks" class="back-link">← Quay lại</a>
+<a mat-button routerLink="/drinks" style="margin-bottom: 16px;">
+  ← Quay lại
+</a>
 
-<form [formGroup]="drinkForm" (ngSubmit)="save()" class="drink-form">
-  <div class="form-group">
-    <label for="name">Tên món</label>
-    <input id="name" type="text" formControlName="name" />
-  </div>
+<form (submit)="save($event)" style="max-width: 600px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px;">
+  
+  <mat-form-field appearance="outline">
+    <mat-label>Tên món</mat-label>
+    <input matInput type="text" [formField]="drinkForm.name" />
+    @for (error of drinkForm.name().errors(); track error){
+      <mat-error>{{error.message}}</mat-error>
+    }
+  </mat-form-field>
 
-  <div class="form-group">
-    <label for="desc">Mô tả</label>
-    <input id="desc" type="text" formControlName="description" />
-  </div>
+  <mat-form-field appearance="outline">
+    <mat-label>Mô tả</mat-label>
+    <textarea matInput [formField]="drinkForm.description" rows="3"></textarea>
+    @for(error of drinkForm.description().errors(); track error){
+      <mat-error>{{error.message}}</mat-error>
+    }
+  </mat-form-field>
 
-  <div class="form-group">
-    <label for="price">Giá cơ bản</label>
-    <input id="price" type="number" formControlName="giaCoBan" />
-  </div>
+  <mat-form-field appearance="outline">
+    <mat-label>Giá cơ bản</mat-label>
+    <!-- Nhập số -->
+    <input matInput type="number" [formField]="drinkForm.giaCoBan" />
+    @for(error of drinkForm.giaCoBan().errors(); track error){
+      <mat-error>{{error.message}}</mat-error>
+    }
+  </mat-form-field>
+  <form novalidate (submit)="save($event)" style ="max-width: 600px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px;">
+  <!-- Thêm ô email tác giả -->
+  <mat-form-field appearance="outline">
+    <mat-label>Email người tạo</mat-label>
+    <input matInput type="email" [formField]="drinkForm.authorEmail" />
+    @for(error of drinkForm.authorEmail().errors(); track error){
+      <mat-error>{{error.message}}</mat-error>
+    }
+  </mat-form-field>
 
-  <div class="form-group">
-    <label for="img">Ảnh món</label>
-    <input id="img" type="url" formControlName="imgUrl" placeholder="https://..." />
-  </div>
-
-  <div class="form-group">
-    <label>Topping</label>
-    <div formArrayName="toppings">
-      @for (topping of toppings.controls; track topping; let i = $index) {
-        <div [formGroupName]="i" class="topping-row">
-          <input type="text" formControlName="name" placeholder="Tên topping" />
-          <input type="number" formControlName="quantity" placeholder="Số lượng" />
-          <input type="text" formControlName="unit" placeholder="Đơn vị" />
-          <button type="button" class="btn-remove" (click)="removeTopping(i)">Xóa</button>
-        </div>
-      }
-    </div>
-    <button type="button" class="btn-add" (click)="addTopping()">+ Thêm topping</button>
-  </div>
-
-  <button type="submit" class="btn-save">Lưu</button>
+  <button mat-flat-button color="primary" type="submit" [disabled]="drinkForm().submitting()" style="padding: 24px 0; font-size: 1.1rem;">
+    Lưu món
+  </button>
 </form>
