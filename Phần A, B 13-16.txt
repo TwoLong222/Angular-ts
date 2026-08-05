@@ -1,0 +1,108 @@
+Ph?n A – Lý thuy?t
+1. Vì sao v?i signal ta ph?i dùng d?ng tách r?i [ngModel] + (ngModelChange) mà không dùng ???c cú pháp g?p [(ngModel)]?
+* Cú pháp g?p [(ngModel)] yêu c?u gán giá tr? tr?c ti?p, trong khi ?ó signal ph?i g?i ph??ng th?c .set() ?? c?p nh?t d? li?u. 
+2. $event trong (ngModelChange)="keyword.set($event)" là gì?
+* $event là bi?n ??i di?n cho giá tr? chu?i m?i nh?t mà ng??i dùng v?a gõ vào ô input t?i th?i ?i?m s? ki?n thay ??i x?y ra.
+3. Phân bi?t map(), filter() và find(): m?i cái tr? v? gì?
+* .map() tr? v? m?t m?ng m?i ?ã ???c bi?n ??i d?a trên logic tính toán. 
+* .filter() tr? v? m?t m?ng m?i ch?a các ph?n t? th?a mãn ?i?u ki?n. 
+* .find() tr? v? m?t ph?n t? ??u tiên kh?p ?i?u ki?n, ho?c tr? v? undefined n?u không tìm th?y. 
+4. Vì sao khi tìm ki?m nên g?i toLowerCase() ? c? hai bên so sánh?
+* ?? ??m b?o vi?c tìm ki?m không b? phân bi?t ch? hoa và ch? th??ng, giúp ??i chi?u chính xác b?t k? cách nh?p li?u c?a ng??i dùng. 
+5. providedIn: 'root' ngh?a là gì? N?u không có nó thì chuy?n gì x?y ra khi hai component cùng dùng m?t service?
+* providedIn: 'root' giúp t?o ra m?t b?n th? duy nh?t (singleton) c?a service cho toàn b? ?ng d?ng. 
+* N?u không có khai báo này, m?i component khi tiêm service vào s? t? t?o ra m?t b?n sao hoàn toàn m?i, d?n ??n d? li?u không ???c ??ng b? gi?a các trang.
+6. asReadonly() dùng ?? làm gì? Vì sao service nên gi? signal g?c private và ch? cho ra ngoài b?n ch? ??c?
+* asReadonly() ???c dùng ?? t?o ra m?t b?n ch? ??c cho bên ngoài. 
+* C?n gi? signal g?c private ?? ??m b?o ch? có service m?i có quy?n tr?c ti?p ch?nh s?a d? li?u g?c, ng?n các component khác vô tình làm h?ng ho?c s?a ??i tr?ng thái ?ng d?ng sai quy t?c. 
+7. K? ra ba n?i khác nhau m?t th? có th? "?i vào" component: inject(), m?ng imports, và import th??ng. Cho m?t ví d? cho m?i n?i.
+* inject(): Dành cho các thành ph?n trong h? th?ng DI (Service). Ví d?: Router, FormBuilder, DrinkService. 
+* M?ng imports: Dành cho Component, Directive, Pipe s? d?ng trong HTML template. Ví d?: FormsModule, RouterLink. 
+* Import th??ng: Dành cho interface, hàm ??c l?p. Ví d?: DrinkModel, signal, Validators. 
+8. inject() g?i ???c ? ?âu và không g?i ???c ? ?âu? L?i gì x?y ra n?u g?i sai ch??
+* inject() ch? ???c g?i ? ng? c?nh tiêm (dòng khai báo thu?c tính class ho?c bên trong constructor). 
+* Không ???c g?i bên trong m?t ph??ng th?c hàm; n?u g?i sai s? báo l?i NG0203. 
+9. Vì sao pathMatch: 'full' là b?t bu?c v?i route r?ng path: ''?
+* Vì n?u không có pathMatch: 'full', route r?ng s? t? ??ng kh?p làm ti?n t? c?a b?t k? ???ng d?n nào, gây l?i ?i?u h??ng lo?n x?. 
+10. Phân bi?t href="/drinks/2" và [routerLink]="['/drinks', 2]". H?u qu? c?a vi?c dùng sai?
+* href yêu c?u trình duy?t t?i l?i toàn b? trang web. 
+* routerLink yêu c?u Router c?a Angular tráo ??i component n?i b? mà không c?n t?i l?i trang. 
+* N?u dùng sai href, ?ng d?ng SPA c?a b?n s? t?i ch?m ch?p và m?t toàn b? tr?ng thái ?ang l?u gi?ng h?t website truy?n th?ng.
+11. route.params và route.paramMap khác nhau th? nào? Cách l?y giá tr? c?a m?i lo?i?
+* route.params: Là m?t ??i t??ng th??ng. Cách l?y: params()?.['id']. 
+* route.paramMap: Là m?t ??i t??ng ?i kèm hàm get(). Cách l?y: paramMap()?.get('id'). 
+12. Vì sao tham s? l?y t? URL luôn ph?i ??a qua Number() tr??c khi so sánh v?i id?
+* Vì d? li?u bóc tách ???c t? URL luôn m?c ??nh là chu?i (string), c?n ép v? ki?u s? ?? vi?c ??i chi?u id (number) ho?t ??ng chính xác. 
+13. So sánh Template-driven form (ngModel) và Reactive form (formGroup): m?i lo?i phù h?p v?i tình hu?ng nào?
+* Template-driven: Qu?n lý ? HTML, ??n gi?n, phù h?p cho các ô nh?p li?u c? b?n, ít ràng bu?c (ví d?: ô tìm ki?m). 
+* Reactive form: Qu?n lý b?ng logic TypeScript, m?nh m?, phù h?p cho các form l?n c?n validate ph?c t?p, b?t bu?c nh?p nhi?u thông tin (ví d?: form thêm món m?i). 
+14. Vì sao dùng (ngSubmit) trên th? <form> t?t h?n (click) trên nút g?i?
+* ?? bao quát m?i ph??ng th?c g?i form (nh?n chu?t, ho?c nh?n phím Enter khi ?ang ??ng ? ô input). 
+15. value và getRawValue() khác nhau ? ki?u tr? v? th? nào? Và fb.nonNullable.group() gi?i quy?t thêm v?n ?? gì?
+* value b? qua các ô b? vô hi?u hóa, tr? v? ki?u có th? ch?a undefined. 
+* getRawValue() l?y toàn b? ô form, tr? v? ki?u có th? ch?a null. 
+* Thêm fb.nonNullable.group() s? lo?i b? hoàn toàn null, giúp tr? v? ki?u d? li?u chính xác tuy?t ??i mà không c?n ki?m tra l?i. 
+16. Vì sao trong service không ???c dùng .push() ?? thêm ph?n t? vào m?ng c?a signal?
+* Vì .push() s?a ??i tr?c ti?p m?ng g?c, vi ph?m nguyên t?c b?t bi?n c?a signal. Thay vào ?ó, c?n dùng .update() ?? sinh ra m?t m?ng hoàn toàn m?i ch?a ph?n t? ???c n?i thêm. 
+Ph?n B – Tìm l?i trong code
+L?i s? 1
+* L?i & Gi?i thích: Dùng cú pháp g?p [(ngModel)] v?i state d?ng signal là sai vì signal không cho phép gán tr?c ti?p. 
+* Vi?t l?i:
+<input [ngModel]="keyword()" (ngModelChange)="keyword.set($event)" type="search" />
+L?i s? 2
+* L?i & Gi?i thích: Component ?ang dùng thu?c tính ngModel trong HTML nh?ng m?ng imports l?i tr?ng, quên khai báo th? vi?n Form. 
+* Vi?t l?i: B? sung th? vi?n vào m?ng imports:
+imports: [FormsModule],
+L?i s? 3
+* L?i & Gi?i thích: ?ã ép bi?n key v? ch? th??ng nh?ng l?i quên ép ch? th??ng cho bi?n drink.name g?c tr??c khi dùng hàm .includes(), d?n ??n vi?c tìm ki?m v?n phân bi?t hoa/th??ng. 
+* Vi?t l?i:
+return this.drinks().filter((drink) => drink.name.toLowerCase().includes(key));
+L?i s? 4
+* L?i & Gi?i thích: Service thi?u tham s? providedIn: 'root' bên trong @Injectable(), khi?n c?u hình instance singleton b? thi?u. 
+* Vi?t l?i:
+@Injectable({ providedIn: 'root' })
+L?i s? 5
+* L?i & Gi?i thích: L?i sai th? t?. Bi?n selectedDrink ?ang c? g?ng s? d?ng this.drinkService tr??c khi service này ???c khai báo ? dòng d??i. 
+* Vi?t l?i: ??a dòng khai báo inject lên trên:
+TypeScript
+private readonly drinkService = inject(DrinkService);
+protected readonly selectedDrink = signal<DrinkModel>(this.drinkService.drinks()[0]);
+L?i s? 6
+* L?i & Gi?i thích: G?i inject(Router) bên trong m?t ph??ng th?c (goBack()). inject() không ???c phép g?i bên trong các hàm. 
+* Vi?t l?i: ??a khai báo lên ph?n thu?c tính c?a class:
+TypeScript
+private readonly router = inject(Router);
+protected goBack(): void {
+  this.router.navigate(['/drinks']);
+}
+L?i s? 7
+* L?i & Gi?i thích: ??t route ??ng (:id) phía trên route c? th? (new). Router s? quét t? trên xu?ng và hi?u nh?m ch? "new" chính là giá tr? c?a :id. 
+* Vi?t l?i: ??o v? trí, ??y route t?nh lên tr??c:
+TypeScript
+{ path: 'drinks/new', component: AddDrink },
+{ path: 'drinks/:id', component: DrinkDetail },
+L?i s? 8
+* L?i & Gi?i thích: G?i hàm .get() trên bi?n route.params. Bi?n này ch? là object th??ng nên không h? tr? .get(). 
+* Vi?t l?i: Thay params thành paramMap:
+private readonly params = toSignal(this.route.paramMap);
+L?i s? 9
+* L?i & Gi?i thích: Tham s? l?y ra t? params() luôn là m?t chu?i, nh?ng hàm getDrinkById l?i c?n nh?n vào s? (number). 
+* Vi?t l?i: B?c Number() l?i:
+const id = Number(this.params()?.get('id'));
+L?i s? 10
+* L?i & Gi?i thích: S? d?ng .push() ?? thao tác th?ng vào m?ng n?i b? c?a signal, ?i?u này phá v? c? ch? báo hi?u c?p nh?t c?a Angular. 
+* Vi?t l?i: Dùng .update() và Spread Operator:
+this.drinksState.update((current) => [...current, newDrink]);
+L?i s? 11
+* L?i & Gi?i thích: ?ã ép ki?u bi?n an toàn v?i kh?i as drink nh?ng l?i ti?p t?c s? d?ng l?i g?i hàm g?c selectedDrink() ? bên trong kh?i l?nh. 
+* Vi?t l?i:
+<h2>{{ drink.name }}</h2>
+L?i s? 12
+* L?i & Gi?i thích: Sai th? t? khai báo bi?n (gi?ng L?i 5). C? g?ng dùng this.fb tr??c khi nó ???c kh?i t?o. 
+* Vi?t l?i: ??a dòng tiêm FormBuilder lên trên ??u:
+TypeScript
+private readonly fb = inject(FormBuilder);
+protected readonly drinkForm = this.fb.group({
+  name: ['', Validators.required],
+});
+
