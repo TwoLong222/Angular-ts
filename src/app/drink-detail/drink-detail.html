@@ -1,6 +1,12 @@
+<a mat-button routerLink="/drinks" class="back-link">
+  <mat-icon>arrow_back</mat-icon>
+  Quay lại
+</a>
+
+@if (selectedDrink(); as drink) {
 <mat-card style="max-width: 600px; margin: 24px auto; border-radius: 24px; box-shadow: 0 8px 24px rgba(0,0,0,0.08);">
-  
-  
+
+
   <img mat-card-image [src]="drink.imgUrl" [alt]="drink.name" style="object-fit: cover; max-height: 300px; border-top-left-radius: 24px; border-top-right-radius: 24px;">
 
   <mat-card-header style="margin-top: 16px;">
@@ -12,8 +18,8 @@
     <p style="font-size: 1.4rem; font-weight: bold; color: var(--cam-dam); margin-top: 8px;">
       Giá: {{ drink.giaCoBan }}đ
     </p>
-    
-    
+
+
     <div style="display: flex; align-items: center; justify-content: center; gap: 24px; margin: 32px 0; padding: 16px; background: #f9fafb; border-radius: 16px;">
       <button mat-mini-fab color="accent" aria-label="Giảm số lượng" (click)="giamSoLy()" [disabled]="soLy() <= 1">
         <mat-icon>remove</mat-icon>
@@ -30,24 +36,28 @@
 
     <h3 style="margin-top: 24px; font-weight: bold; border-bottom: 2px solid #f1f5f9; padding-bottom: 8px;">Topping</h3>
     <mat-list>
-      
-      <mat-list-item>
-        <span matListItemTitle>Trân châu đen</span>
-      </mat-list-item>
-      <mat-list-item>
-        <span matListItemTitle>Thạch trái cây</span>
-      </mat-list-item>
+      @for (topping of toppingCanDung(); track topping.name) {
+        <mat-list-item>
+          <span matListItemTitle>{{ ingredientIcon(topping.name) }} {{ topping.name }} — {{ topping.quantity }}{{ topping.unit }}</span>
+        </mat-list-item>
+      }
     </mat-list>
   </mat-card-content>
 
-  
+
   <mat-card-actions align="end" style="padding: 16px; border-top: 1px solid #f1f5f9;">
-    
-    <button mat-button color="warn" style="margin-right: auto;">Xóa món</button>
-    
-    <a mat-stroked-button routerLink="/drinks">
-      <mat-icon>arrow_back</mat-icon> Quay lại
-    </a>
+    <button
+      mat-flat-button
+      color="warn"
+      type="button"
+      style="margin-right: auto;"
+      (click)="deleteItem(drink.id)">
+      <mat-icon>delete</mat-icon>
+      Xóa món
+    </button>
   </mat-card-actions>
 
 </mat-card>
+} @else {
+  <p style="text-align: center; padding: 32px; color: gray;">Đang tải hoặc không tìm thấy món này...</p>
+}

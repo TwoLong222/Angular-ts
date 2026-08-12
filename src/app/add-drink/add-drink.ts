@@ -23,8 +23,7 @@ export class AddDrink {
   private readonly snackBar = inject(MatSnackBar);
   private readonly router = inject(Router);
 
-  protected readonly drinkModel = signal({
-    id: 0,
+  protected readonly drinkModel = signal<Omit<DrinkModel, 'id'>>({
     name:'',
     description:'',
     giaCoBan:0,
@@ -46,7 +45,6 @@ export class AddDrink {
     if(ok){
       this.drinkForm().reset();
       this.drinkModel.set({
-        id: 0,
         name:'',
         description:'',
         giaCoBan:0,

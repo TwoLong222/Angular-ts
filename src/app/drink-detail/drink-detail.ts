@@ -7,31 +7,47 @@ import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatListModule } from '@angular/material/list';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+
+@Component({
+  selector: 'app-confirm-delete-dialog',
+  standalone: true,
+  imports: [MatDialogModule, MatButtonModule],
+  template: `
+    <h2 mat-dialog-title>Xác nhận xóa</h2>
+    <mat-dialog-content>
+      Bạn có chắc chắn muốn xóa món này không?
+    </mat-dialog-content>
+    <mat-dialog-actions align="end">
+      <button mat-button mat-dialog-close>Hủy</button>
+      <button mat-flat-button color="warn" [mat-dialog-close]="true">Xóa</button>
+    </mat-dialog-actions>
+  `,
+})
+export class ConfirmDeleteDialogComponent {}
 
 @Component({
   selector: 'app-drink-detail',
   standalone: true,
-  imports: [CommonModule, RouterLink, MatCardModule, MatButtonModule, MatIconModule, MatListModule],
+  imports: [CommonModule, RouterLink, MatCardModule, MatButtonModule, MatIconModule, MatListModule, MatDialogModule],
   templateUrl: './drink-detail.html',
   styleUrl: './drink-detail.css',
 })
 export class DrinkDetail {
-  drink: any;
+
   private readonly drinkService = inject(DrinkService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
+  private readonly dialog = inject(MatDialog);
   private readonly params = toSignal(this.route.paramMap);
 
+  // Dữ liệu tới từ HTTP (bất đồng bộ) -> selectedDrink có thể chưa sẵn sàng
+  // ngay khi component khởi tạo, khác với lúc còn đọc mock đồng bộ.
   protected readonly selectedDrink = computed(() =>{
-    const id = Number(this.params()?.get('id'));
-    return this.drinkService.getDrinkById(id);
+    const id = this.params()?.get('id');
+    return id ? this.drinkService.getDrinkById(id) : undefined;
   });
-    
-  constructor(){
-    
-    const id = Number(this.route.snapshot.paramMap.get('id'));
-    this.drink = this.drinkService.getDrinkById(id);
-  }
+
   protected readonly soLy = signal<number>(1);
   protected readonly tongTien = computed(() => (this.selectedDrink()?.giaCoBan || 0) * this.soLy());
 
@@ -89,13 +105,22 @@ export class DrinkDetail {
     return '🧁';
   }
   
-  protected deleteItem(id: number): void {
-    this.drinkService.deleteDrink(id);
-    this.router.navigate(['/drinks']); 
+  protected deleteItem(id: string): void {
+    const dialogRef = this.dialog.open(ConfirmDeleteDialogComponent, {
+      width: '400px',
+      disableClose: true,
+    });
+
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result === true) {
+        this.drinkService.deleteDrink(id);
+        this.router.navigate(['/drinks']);
+      }
+    });
   }
 
  
-  protected toggleFav(id: number): void {
+  protected toggleFav(id: string): void {
     this.drinkService.toggleFavorite(id);
   }
 }

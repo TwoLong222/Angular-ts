@@ -82,14 +82,17 @@ export class DrinkList {
 
   protected readonly resultCount = computed(() => this.filteredDrinks().length);
   
-  protected deleteDrink(id: number): void {
+  protected deleteDrink(event: Event, id: string): void {
+    event.preventDefault();
+    event.stopPropagation();
+
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
       width: '400px'
     });
 
     dialogRef.afterClosed().subscribe((result) => {
       if (result === true) {
-        this.drinkService.deleteDrink(id); 
+        this.drinkService.deleteDrink(id);
       }
     });
   }

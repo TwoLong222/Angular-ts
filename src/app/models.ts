@@ -5,11 +5,12 @@ export interface Topping {
 }
 
 export interface DrinkModel{
-    id: number;
+    id: string;
     name: string;
     description: string;
     giaCoBan: number;
     imgUrl: string;
     isPopular: boolean;
     toppings: Topping[];
+    authorEmail: string;
 }

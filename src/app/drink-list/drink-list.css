@@ -30,8 +30,23 @@
 
 .add-button {
   height: 56px;
-  border-radius: 14px;
+  border-radius: 8px;
   white-space: nowrap;
+}
+
+.filter-chips-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  width: 100%;
+}
+
+.popular-add-button {
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  box-shadow: 0 8px 20px rgba(34, 40, 49, 0.1);
 }
 
 .sort-field {
@@ -129,4 +144,8 @@ mat-card-actions {
   color: rgba(0, 0, 0, 0.7);
   text-align: center;
   font-style: italic;
+}
+
+.delete-button {
+  margin-left: 0.5rem;
 }

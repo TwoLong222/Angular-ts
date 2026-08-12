@@ -1,30 +1,43 @@
-import { Injectable,signal } from '@angular/core';
-import { MOCK_DRINKS } from './mock-drinks';
+import { Injectable, computed, inject } from '@angular/core';
+import { HttpClient, httpResource } from '@angular/common/http';
+import { firstValueFrom } from 'rxjs';
 import { DrinkModel } from './models';
+
+const API_URL = 'http://localhost:3001/drinks';
 
 @Injectable({
   providedIn: 'root',
 })
-
 export class DrinkService {
-  private readonly drinkState = signal<DrinkModel[]>(MOCK_DRINKS);
+  private readonly http = inject(HttpClient);
 
-  readonly drinks = this.drinkState.asReadonly();
-  getDrinkById(id: number): DrinkModel | undefined {
-    return this.drinkState().find((d) => d.id === id);
-  }
-  addDrink(newDrink: DrinkModel): void{
-    this.drinkState.update(current => [...current, newDrink]);
-  }
+  private readonly drinksResource = httpResource<DrinkModel[]>(() => API_URL, {
+    defaultValue: [],
+  });
 
- 
-  deleteDrink(id: number): void {
-    this.drinkState.update(current => current.filter(d => d.id !== id));
+  readonly drinks = computed(() => this.drinksResource.value() ?? []);
+  readonly loading = this.drinksResource.isLoading;
+
+  getDrinkById(id: string): DrinkModel | undefined {
+    return this.drinks().find((d) => d.id === id);
   }
 
-  toggleFavorite(id: number): void {
-    this.drinkState.update(current => 
-      current.map(d => d.id === id ? { ...d, isPopular: !d.isPopular } : d)
+  async addDrink(newDrink: Omit<DrinkModel, 'id'>): Promise<void> {
+    await firstValueFrom(this.http.post<DrinkModel>(API_URL, newDrink));
+    this.drinksResource.reload();
+  }
+
+  async deleteDrink(id: string): Promise<void> {
+    await firstValueFrom(this.http.delete<void>(`${API_URL}/${id}`));
+    this.drinksResource.reload();
+  }
+
+  async toggleFavorite(id: string): Promise<void> {
+    const drink = this.getDrinkById(id);
+    if (!drink) return;
+    await firstValueFrom(
+      this.http.patch<DrinkModel>(`${API_URL}/${id}`, { isPopular: !drink.isPopular }),
     );
+    this.drinksResource.reload();
   }
 }

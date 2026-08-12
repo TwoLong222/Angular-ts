@@ -25,14 +25,16 @@
         </mat-select>
       </mat-form-field>
 
-      <mat-chip-listbox aria-label="Lọc trạng thái" class="filter-chips">
-        <mat-chip-option [selected]="filter() === 'all'" (click)="filter.set('all')">
-          Tất cả
-        </mat-chip-option>
-        <mat-chip-option color="accent" [selected]="filter() === 'popular'" (click)="filter.set('popular')">
-          Phổ biến 🌟
-        </mat-chip-option>
-      </mat-chip-listbox>
+      <div class="filter-chips-row">
+        <mat-chip-listbox aria-label="Lọc trạng thái" class="filter-chips">
+          <mat-chip-option [selected]="filter() === 'all'" (click)="filter.set('all')">
+            Tất cả
+          </mat-chip-option>
+          <mat-chip-option color="accent" [selected]="filter() === 'popular'" (click)="filter.set('popular')">
+            Phổ biến 🌟
+          </mat-chip-option>
+        </mat-chip-listbox>
+      </div>
     </div>
   </mat-card>
 
@@ -42,17 +44,21 @@
 
   <mat-nav-list style="background: white; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); padding: 8px 0;">
   @for (drink of filteredDrinks(); track drink.id) {
-    <a mat-list-item [routerLink]="['/drinks', drink.id]">
-      
-      <!-- SỬA Ở ĐÂY: Thêm matListItemAvatar và object-fit để ảnh không bị méo -->
+    <mat-list-item [routerLink]="['/drinks', drink.id]">
       <img matListItemAvatar [src]="drink.imgUrl" style="object-fit: cover;" alt="Trà sữa" />
-      
       <span matListItemTitle>{{ drink.name }}</span>
-      
-      <button mat-icon-button matListItemMeta color="warn" (click)="deleteDrink(drink.id); $event.preventDefault(); $event.stopPropagation()">
+
+      <button
+        mat-icon-button
+        matListItemMeta
+        color="warn"
+        type="button"
+        class="delete-button"
+        aria-label="Xóa món"
+        (click)="deleteDrink($event, drink.id)">
         <mat-icon>delete</mat-icon>
       </button>
-    </a>
+    </mat-list-item>
   } @empty {
     <p style="padding: 16px; text-align: center; color: gray; font-style: italic;">
       Không tìm thấy món ăn nào khớp với từ khóa
