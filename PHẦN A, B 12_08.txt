@@ -1,0 +1,234 @@
+Bài t?p v? nhà (NestJS) — S? 01: Recipe API + MongoDB
+Ph?n A — Bài gi?i lý thuy?t
+V? ki?n trúc NestJS nói chung
+1. @Injectable() cho phép Nest "t? t?o và t? truy?n" m?t instance mà b?n không h? g?i new. C? ch? nào ??ng sau chuy?n ?ó?
+C? ch? ??ng sau là Dependency Injection container (IoC container) c?a Nest. @Injectable() ?ánh d?u m?t class là provider mà container có quy?n qu?n lý. Khi ?ng d?ng kh?i ??ng, Nest ??c metadata c?a t?ng class (d?a trên design:paramtypes mà TypeScript sinh ra khi biên d?ch v?i decorator, qua reflect-metadata), d?ng thành m?t dependency graph, r?i t? g?i new theo ?úng th? t? ph? thu?c (dependency ???c t?o tr??c, dependent t?o sau) và l?u instance vào container. Khi m?t class khác c?n nó — khai báo trong constructor — Nest tra ?úng token trong container và t? "tiêm" instance vào, không ai ph?i g?i new th? công. ?ây chính là Inversion of Control: thay vì code t? t?o dependency c?a chính nó, m?t th?c th? bên ngoài (container) ??ng ra t?o và tiêm vào. Container còn qu?n lý luôn vòng ??i c?a instance (m?c ??nh là singleton dùng chung toàn app, ngoài ra còn có request-scoped và transient).
+2. M?t provider n?m trong providers nh?ng không n?m trong exports thì module khác import ???c x?y ra chuy?n gì khi c? inject nó? Vì sao thi?t k? "m?c ??nh ?óng" l?i an toàn h?n?
+N?u provider không có trong exports, module khác dù ?ã import module này r?i c? @Inject provider ?ó v?n s? nh?n l?i ngay lúc kh?i ??ng ?ng d?ng (d?ng "Nest can't resolve dependencies..." vì provider ?ó không ???c coi là t?n t?i ??i v?i module ngoài) — nó ch? là chi ti?t n?i b? (private) c?a module khai báo ra nó. exports chính là danh sách "public API" c?a module.
+Thi?t k? "m?c ??nh ?óng, ph?i khai báo m?i m?" an toàn h?n vì nó gi?i h?n di?n ti?p xúc (surface area): m?i module t? quy?t ??nh ph?n nào công khai, ph?n nào gi? riêng ?? refactor t? do mà không s? phá v? module khác ?ang ph? thu?c vào chi ti?t n?i b? c?a nó. N?u m?c ??nh m?, m?i provider n?i b? ??u vô tình tr? thành h?p ??ng công khai — s?a n?i b? module A có th? âm th?m phá module B, vi ph?m nguyên t?c ?óng gói (encapsulation).
+3. Vì sao logic nghi?p v? không nên n?m trong Controller? Nêu hai h?u qu? c? th? n?u vi?t th?ng code truy v?n database trong hàm x? lý route.
+Controller ch? nên là m?t t?ng m?ng (thin layer) ??m nhi?m vi?c "d?ch" giao th?c HTTP: nh?n request, map param/body, g?i service, tr? v? response/status code ?úng. Hai h?u qu? c? th? n?u nhét th?ng code truy v?n DB vào route handler:
+• Không tái s? d?ng ???c: n?u logic ?ó c?n dùng l?i ? n?i khác (m?t cron job, m?t resolver GraphQL, m?t CLI script), ph?i copy-paste l?i toàn b?, d? l?ch nhau khi s?a m?t ch? mà quên ch? khác.
+• Khó test và khó b?o trì: Controller g?n ch?t v?i Request/Response c?a framework, mu?n unit test logic nghi?p v? ??c l?p ph?i mock toàn b? t?ng HTTP; ??ng th?i khi logic phình to, controller l?n l?n gi?a "??nh tuy?n" và "nghi?p v?", khó ??c, khó review, và không còn seam nào ?? ??i h? t?ng phía sau mà không ??ng vào t?ng trình bày.
+V? REST API design (mang ?i ???c)
+4. T?o tài nguyên thành công th??ng tr? 201, không ph?i 200. S? khác bi?t ?ó nói lên ?i?u gì? Khi nào POST v?n nên tr? 200?
+201 Created nói v?i client: "yêu c?u c?a b?n ?ã sinh ra m?t resource m?i, và ?ây là resource ?ó" — th??ng kèm theo payload/Location tr? t?i resource v?a t?o. 200 OK ch? nói chung chung "x? lý thành công", không cam k?t gì v? vi?c có th?c th? m?i ra ??i hay không. Phân bi?t hai mã này giúp client (nh?t là code t? ??ng) bi?t ch?c có entity m?i mà không c?n ?oán qua n?i dung body.
+M?t POST v?n nên tr? 200 khi nó không t?o tài nguyên m?i theo ngh?a CRUD mà ch? th?c thi m?t hành ??ng: POST /drinks/search (tìm ki?m ph?c t?p c?n g?i kèm body), POST /auth/login (??ng nh?p, tr? token), POST /orders/:id/cancel (thao tác trên tài nguyên ?ã t?n t?i s?n). Nh?ng tr??ng h?p này dùng POST vì c?n g?i body, không ph?i vì ?ang sinh th?c th? m?i.
+5. Vì sao id không t?n t?i và id sai ??nh d?ng nên cùng tr? 404, thay vì cái sau tr? 400?
+N?u id sai ??nh d?ng tr? 400, id ?úng ??nh d?ng nh?ng không t?n t?i tr? 404, client bên ngoài s? vô tình bi?t ???c backend ?ang dùng ki?u ??nh danh nào (ObjectId c?a MongoDB, s? nguyên t?ng d?n...) — m?t chi ti?t l?u tr? n?i b? không nên rò ra qua h?p ??ng API. V?i client, "??nh d?ng id sai" và "id không kh?p resource nào" ??u d?n t?i cùng m?t k?t lu?n: "không tìm th?y resource ? URI này" — t?c cùng là 404 Not Found. ?ây c?ng chính là lý do CastError c?a Mongoose ph?i ???c b?t và chuy?n thành NotFoundException, thay vì ?? l?t ra thành 500.
+6. Quy t?c ch?n route param hay query param?
+Route param (:id) dùng ?? ??nh danh m?t tài nguyên c? th?, duy nh?t trong không gian tài nguyên — ví d? /drinks/:id ngh?a là "chính resource nào". Query param (?keyword=) dùng ?? l?c/tùy ch?n trên m?t t?p h?p — ví d? /drinks?keyword=... ngh?a là "trong t?p /drinks, l?c theo ?i?u ki?n gì". Quy t?c g?n: n?u thi?u giá tr? ?ó thì không còn xác ??nh ???c resource nào — ?ó là route param, b?t bu?c và n?m trong path; n?u thi?u giá tr? ?ó request v?n h?p l?, ch? tr? v? t?p r?ng h?n ho?c m?c ??nh — ?ó là query param, tùy ch?n và không ph?i m?t ph?n ??nh danh tài nguyên.
+V? MongoDB / Mongoose (nguyên t?c, không ph?i cú pháp)
+7. Nêu m?t tình hu?ng d? li?u mà mô hình document x? lý g?n h?n mô hình quan h?.
+Ví d?: Recipe có m?ng ingredients (m?i ingredient g?m tên, s? l??ng, ??n v?). D? li?u này luôn ???c ??c/ghi cùng v?i Recipe cha, không bao gi? truy v?n ingredient ??c l?p tách kh?i công th?c ch?a nó, và s? l??ng ingredient trong m?t recipe th??ng nh?, g?n li?n vòng ??i v?i recipe ?ó. ? mô hình quan h?, ph?i tách thành b?ng riêng Ingredient có khóa ngo?i recipe_id, m?i l?n ??c m?t recipe ??y ?? ph?i JOIN hai b?ng. ? mô hình document, ingredients có th? nhúng th?ng (embed) làm m?ng subdocument bên trong document Recipe — ??c m?t l?n là có toàn b? d? li?u liên quan, không c?n JOIN, ph?n ánh ?úng th?c t? r?ng ingredient "thu?c v?" và luôn ?i cùng recipe (quan h? composition ch?t, không ph?i association l?ng l?o).
+8. Mongoose Schema ?ang b?o v? ? t?ng nào? L?i ích c? th?? Th? gì không m?t ?i?
+Mongoose Schema b?o v? ? t?ng ?ng d?ng (application layer), không ph?i t?ng l?u tr?. MongoDB t? thân ch?p nh?n b?t k? hình d?ng document nào trong cùng m?t collection, không ki?m tra gì. @Schema()/@Prop() là l?p ki?m tra do Mongoose th?c hi?n tr??c khi l?nh ???c g?i xu?ng Mongo (ki?m tra required, ?úng ki?u, cast d? li?u...).
+L?i ích c? th?: b?t l?i s?m ngay t?i ?ng d?ng — ví d? thi?u field required báo l?i ngay lúc .save(), ch? không ph?i l?u xong r?i m?i phát hi?n thi?u d? li?u khi ??c l?i; ??ng th?i TypeScript có ki?u t?nh ?? g?i ý và b?t l?i lúc biên d?ch.
+Th? không m?t ?i: v?n gi? nguyên tính linh ho?t c?a MongoDB — thêm field m?i vào schema b?t c? lúc nào c?ng ???c, không c?n ch?y migration ki?u ALTER TABLE nh? h? qu?n tr? quan h?, vì b?n thân MongoDB ? t?ng l?u tr? v?n schema-less.
+9. Vì sao không nên tr? th?ng _id ra API mà c?n transform thành id? Liên h? DTO.
+_id là chi ti?t implementation c?a MongoDB (ki?u ObjectId, không ph?i ki?u d? li?u chu?n c?a JSON/REST) — tr? th?ng ra ngoài ngh?a là ?? l? luôn vi?c backend ?ang dùng MongoDB, và b?t frontend ph?i hi?u khái ni?m ObjectId dù nó không liên quan gì t?i nghi?p v?. Field có g?ch d??i (_id) c?ng không t? nhiên v?i quy ??c REST/JSON mà client th??ng mong ??i là id.
+?ây chính là lý do DTO t?n t?i: DTO (Data Transfer Object) là ranh gi?i t??ng minh gi?a "d? li?u n?i b? ?ng d?ng l?u tr? th? nào" và "d? li?u client nhìn th?y th? nào" — không ?? chi ti?t bên trong (c?u trúc l?u tr?, ki?u d? li?u database, field n?i b?) rò r? th?ng ra h?p ??ng công khai c?a API. transform trong toJSON ?óng ?úng vai trò ?ó ? chi?u output: d?ch _id (ObjectId) ? id (string) m?t l?n, ?úng t?i biên gi?i gi?a app và bên ngoài.
+10. findById("khong-hop-le") ném CastError thay vì tr? null. H?u qu? n?u không b?t l?i, cách phòng tránh không c?n th? vi?n ngoài?
+N?u không b?t l?i này: khi client g?i id sai ??nh d?ng, Mongoose ném CastError ngay khi c? ép chu?i ?ó thành ObjectId tr??c khi query. Không b?t riêng, b? exception filter m?c ??nh c?a Nest coi ?ây là l?i không xác ??nh và tr? v? 500 Internal Server Error — sai hoàn toàn v? ng? ngh?a, vì ?ây th?c ch?t là l?i phía client (id sai ??nh d?ng), ?áng l? ph?i là 404. Ngoài ra 500 còn làm nhi?u log server b?i nh?ng "l?i" th?c ra ch? là input không h?p l?.
+Cách phòng tránh không c?n th? vi?n validate ngoài: dùng ti?n ích có s?n c?a Mongoose — Types.ObjectId.isValid(id) — ki?m tra ??nh d?ng id tr??c khi ??a vào query; n?u không h?p l? thì coi nh? "không tìm th?y" và tr? 404 ngay, không c?n ch?m t?i database.
+V? c?u hình (config) & kh?i ??ng ?ng d?ng
+11. Vì sao connection string (ch?a m?t kh?u) ph?i n?m trong .env? M?t lý do b?o m?t, m?t lý do không liên quan b?o m?t.
+• Lý do b?o m?t: connection string ch?a m?t kh?u (và có th? c? user, host n?i b?); n?u hardcode trong code, m?t kh?u ?ó s? n?m trong l?ch s? Git v?nh vi?n — k? c? xóa ? commit sau, nó v?n còn trong history. Ch? c?n l? ??y code lên m?t n?i công khai (fork, backup, chia s? nh?m) là l? m?t kh?u.
+• Lý do không liên quan b?o m?t: m?i môi tr??ng (máy cá nhân, staging, production, máy ??ng ??i) th??ng c?n tr? t?i database khác nhau. N?u hardcode, ??i môi tr??ng ph?i s?a code và build l?i — b?t ti?n và d? l?i (ví d? quên ??i l?i tr??c khi deploy khi?n production tr? nh?m database dev). ?? trong .env cho phép ??i c?u hình ??c l?p v?i code, không c?n s?a/build l?i ?ng d?ng.
+12. onModuleInit() ch? seed khi countDocuments() === 0. Mô t? c? th? n?u b? ?i?u ki?n ?ó và seed vô ?i?u ki?n m?i l?n kh?i ??ng l?i.
+M?i l?n app restart — k? c? restart t? ??ng do npm run start:dev phát hi?n ??i code lúc ?ang dev — insertMany(SEED_DRINKS) s? ch?y l?i và chèn thêm nguyên b? d? li?u m?u vào collection. Vì các document m?i ???c sinh _id m?i (không trùng v?i document seed tr??c, nên không báo l?i duplicate key), d? li?u b? nhân b?n sau m?i l?n restart: ch?y 5 l?n thì có 15 món (3 món × 5) thay vì luôn gi? ?úng 3 món. V? lâu dài, d? li?u test b? "rác" d?n, vi?c test tìm ki?m/??m s? l??ng c?ng sai l?ch; n?u tình c? ch?y nh?m trên môi tr??ng có d? li?u th?t thì hành vi này còn nguy hi?m h?n vì liên t?c chèn d? li?u gi? vào database s?ng.
+V? Repository Pattern (n?i dung m?i c?a bài này — Ph?n D)
+13. ??nh ngh?a "seam" b?ng l?i riêng. Vì sao g?i th?ng Model<DrinkDocument> là không có seam, còn g?i qua interface DrinkRepository là có seam?
+Seam (???ng n?i) là m?t ?i?m trong ki?n trúc code mà t?i ?ó có th? thay ??i m?t phía (implementation c? th?) mà phía còn l?i (code g?i nó) không c?n bi?t và không c?n s?a — ranh gi?i ???c c?t có ch? ?ích ?? hai bên ch? giao ti?p qua m?t h?p ??ng (interface) c? ??nh, thay vì ph? thu?c tr?c ti?p vào chi ti?t bên trong c?a nhau.
+DrinkService g?i th?ng Model<DrinkDocument> là không có seam vì service lúc ?ó bi?t chính xác nó ?ang nói chuy?n v?i Mongoose — g?i .find(), .findById(), .exec()... là API riêng c?a th? vi?n ?ó. Mu?n ??i sang th? vi?n/database khác ph?i s?a t?ng dòng bên trong service.
+G?i qua interface DrinkRepository là có seam vì DrinkService ch? bi?t t?i h?p ??ng tr?u t??ng (findAll, findOne, create...), không bi?t implementation phía sau là Mongoose, PostgreSQL hay m?t m?ng l?u t?m trong RAM. ??i implementation ch? c?n ??i ch? binding trong module, DrinkService không s?a m?t ch? nào.
+14. Interface bi?n m?t sau khi compile. NestJS d?a vào ?âu ?? bi?t "ai c?n cái gì" lúc ch?y? Injection token gi?i quy?t th? nào?
+NestJS d?a vào injection token — m?t ??nh danh t?n t?i ???c ? runtime (chu?i, Symbol, ho?c chính class) — ?? bi?t ai c?n cái gì. Vì interface ch? có tác d?ng lúc biên d?ch (type-checking) và bi?n m?t hoàn toàn sau khi TypeScript compile ra JavaScript, Nest không th? "tìm theo tên interface" khi ?ng d?ng ?ang ch?y.
+Gi?i pháp: t?o m?t token thay m?t cho interface ?ó, ví d? export const DRINK_REPOSITORY = Symbol('DRINK_REPOSITORY'), r?i ??ng ký trong providers c?a module b?ng { provide: DRINK_REPOSITORY, useClass: MongooseDrinkRepository } — nói v?i container "ai xin token này thì ??a cho h? instance c?a MongooseDrinkRepository". N?i c?n dùng, khai @Inject(DRINK_REPOSITORY) ?? nói v?i runtime ?i tìm ?úng token ?ó, còn ki?u TypeScript (: DrinkRepository) ch? dùng ?? báo compile-time class này ???c phép g?i nh?ng method nào. Hai c? ch? — token cho runtime, ki?u cho compile-time — t?n t?i song song, ??c l?p nh?ng b? tr? nhau.
+15. ??i t? MongoDB sang PostgreSQL: cách vi?t "Service g?i th?ng Model" ph?i s?a bao nhiêu file? Cách vi?t "qua interface + token" thì khác th? nào?
+V?i cách vi?t "Service g?i th?ng Model c?a Mongoose": ph?i s?a DrinkService — t?c t?ng nghi?p v? (business logic layer) — vì m?i l?i g?i .find(), .findById(), .exec(), cú pháp regex tìm ki?m... ??u n?m ngay trong service ?ó. Ngoài ra còn ph?i s?a c? schema/model definition (drink.entity.ts, DrinkSchema) vì ?ó là khái ni?m riêng c?a Mongoose, và có nguy c? ph?i s?a c? file test vì chúng mock tr?c ti?p Model c?a Mongoose. S? file c?n s?a t? l? v?i s? n?i service g?i tr?c ti?p API c?a Mongoose.
+V?i cách vi?t "qua interface + token": ch? c?n vi?t thêm m?t implementation m?i ? t?ng h? t?ng (ví d? PostgresDrinkRepository implements DrinkRepository), r?i ??i ?úng m?t dòng binding trong module ({ provide: DRINK_REPOSITORY, useClass: PostgresDrinkRepository }). DrinkService (t?ng nghi?p v?) và DrinkController (t?ng trình bày/HTTP) không b? ??ng t?i m?t dòng nào, vì chúng ch? ph? thu?c vào interface DrinkRepository ch? không ph? thu?c vào Mongoose. ?ây chính là giá tr? th?c ti?n c?a seam: gi?i h?n ph?m vi ?nh h??ng c?a m?t thay ??i h? t?ng l?n xu?ng ch? còn m?t t?ng duy nh?t.
+
+Ph?n B — Tìm l?i trong code
+L?i s? 1
+@Injectable()
+export class DrinkService {
+  constructor(private readonly drinkModel: Model<DrinkDocument>) {}
+
+  findAll(): Promise<Drink[]> {
+    return this.drinkModel.find().exec();
+  }
+}
+L?i: thi?u decorator @InjectModel(Drink.name) tr??c tham s? drinkModel trong constructor.
+T?i sao sai: Nest DI ho?t ??ng d?a trên token ? runtime. Model<DrinkDocument> ch? là m?t ki?u TypeScript, bi?n m?t sau khi compile — Nest không t? bi?t ph?i l?y Mongoose Model nào ?? tiêm vào n?u thi?u token t??ng minh. Thi?u @InjectModel, Nest không tìm ???c provider phù h?p cho tham s? này và ném l?i "Nest can't resolve dependencies of DrinkService" ngay khi kh?i ??ng ?ng d?ng.
+S?a l?i:
+constructor(
+  @InjectModel(Drink.name) private readonly drinkModel: Model<DrinkDocument>,
+) {}
+L?i s? 2
+@Get(':id')
+findOne(@Param('id') id: string) {
+  return this.drinkService.findOne(+id);
+}
+L?i: dùng +id ?? ép id thành s? tr??c khi truy?n vào service.
+T?i sao sai: id c?a MongoDB là ObjectId, bi?u di?n d??i d?ng chu?i hex 24 ký t? (ví d? "507f191e810c19729de860ea"), không ph?i s? nguyên. +id cho ra NaN v?i h?u h?t id th?t, khi?n service luôn tìm v?i giá tr? sai.
+S?a l?i:
+@Get(':id')
+findOne(@Param('id') id: string) {
+  return this.drinkService.findOne(id);
+}
+L?i s? 3
+async findOne(id: string): Promise<Drink> {
+  const drink = await this.drinkModel.findById(id).exec();
+  if (!drink) {
+    throw new NotFoundException(`Drink with id ${id} not found`);
+  }
+  return drink;
+}
+L?i: g?i th?ng findById(id) mà không ki?m tra ??nh d?ng id tr??c b?ng Types.ObjectId.isValid(id).
+T?i sao sai: n?u id có ??nh d?ng không h?p l?, Mongoose ném CastError ngay khi c? ép id sang ObjectId — khác h?n v?i vi?c tr? v? null nh? "không tìm th?y". Không b?t riêng, Nest coi ?ây là l?i không xác ??nh và tr? 500 Internal Server Error, trong khi b?n ch?t ch? là input sai ??nh d?ng t? client, ?áng l? ph?i là 404.
+S?a l?i:
+async findOne(id: string): Promise<Drink> {
+  const drink = Types.ObjectId.isValid(id)
+    ? await this.drinkModel.findById(id).exec()
+    : null;
+  if (!drink) {
+    throw new NotFoundException(`Drink with id ${id} not found`);
+  }
+  return drink;
+}
+L?i s? 4
+async onModuleInit(): Promise<void> {
+  await this.drinkModel.insertMany(SEED_DRINKS);
+}
+L?i: seed vô ?i?u ki?n, thi?u ki?m tra countDocuments() === 0.
+T?i sao sai: onModuleInit() ch?y m?i l?n ?ng d?ng kh?i ??ng, k? c? khi t? restart do thay ??i code lúc dev (npm run start:dev). Không có ?i?u ki?n, m?i l?n kh?i ??ng l?i s? chèn thêm m?t b? SEED_DRINKS m?i (v?i _id m?i nên không báo l?i duplicate), khi?n d? li?u b? nhân b?n liên t?c.
+S?a l?i:
+async onModuleInit(): Promise<void> {
+  const count = await this.drinkModel.countDocuments();
+  if (count === 0) {
+    await this.drinkModel.insertMany(SEED_DRINKS);
+  }
+}
+L?i s? 5
+@Schema()
+export class Drink {
+  @Prop({ required: true })
+  name!: string;
+
+  @Prop({ type: [ToppingSchema], default: [] })
+  toppings!: Topping[];
+}
+L?i: thi?u c?u hình toJSON.transform trong @Schema().
+T?i sao sai: không có transform, khi tr? document ra JSON, client nh?n th?ng field _id (ki?u ObjectId) và __v (version key n?i b? c?a Mongoose) — ?? l? chi ti?t implementation c?a MongoDB/Mongoose ra t?n API công khai, ng??c nguyên t?c DTO / ranh gi?i app–bên ngoài.
+S?a l?i:
+@Schema({
+  toJSON: {
+    virtuals: true,
+    transform: (_doc, ret: Record<string, any>) => {
+      ret.id = ret._id.toString();
+      delete ret._id;
+      delete ret.__v;
+    },
+  },
+})
+export class Drink {
+  @Prop({ required: true })
+  name!: string;
+
+  @Prop({ type: [ToppingSchema], default: [] })
+  toppings!: Topping[];
+}
+L?i s? 6
+@Schema()
+export class Topping {
+  @Prop({ required: true })
+  name!: string;
+
+  @Prop({ required: true })
+  quantity!: number;
+}
+export const ToppingSchema = SchemaFactory.createForClass(Topping);
+L?i: Topping là subdocument (nhúng trong m?ng toppings c?a Drink) nh?ng @Schema() thi?u tùy ch?n { _id: false }.
+T?i sao sai: m?c ??nh Mongoose t? sinh m?t _id riêng cho m?i subdocument trong m?ng, dù Topping không bao gi? ???c truy v?n/tham chi?u ??c l?p nh? m?t entity riêng — nó ch? là d? li?u g?n li?n v?i Drink cha. Sinh _id th?a v?a lãng phí, v?a gây hi?u l?m r?ng topping là resource ??c l?p truy c?p ???c b?ng id riêng.
+S?a l?i:
+@Schema({ _id: false })
+export class Topping {
+  @Prop({ required: true })
+  name!: string;
+
+  @Prop({ required: true })
+  quantity!: number;
+}
+export const ToppingSchema = SchemaFactory.createForClass(Topping);
+L?i s? 7
+@Module({
+  imports: [
+    MongooseModule.forRootAsync({
+      useFactory: () => ({ uri: process.env.MONGODB_URI }),
+    }),
+  ],
+})
+export class AppModule {}
+L?i: ??c process.env.MONGODB_URI tr?c ti?p trong useFactory, không qua ConfigService.
+T?i sao sai: ??c th?ng process.env b? qua toàn b? l?p tr?u t??ng mà ConfigModule cung c?p (validate bi?n môi tr??ng, giá tr? m?c ??nh, n?p .env nh?t quán); ngoài ra useFactory không khai inject: [ConfigService] nên Nest không ??m b?o ConfigModule ?ã n?p xong .env tr??c khi factory này ch?y, có th? khi?n URI là undefined.
+S?a l?i:
+@Module({
+  imports: [
+    ConfigModule.forRoot({ isGlobal: true }),
+    MongooseModule.forRootAsync({
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => ({
+        uri: config.get<string>('MONGODB_URI'),
+      }),
+    }),
+  ],
+})
+export class AppModule {}
+L?i s? 8
+@Delete(':id')
+@HttpCode(204)
+remove(@Param('id') id: string) {
+  this.drinkService.remove(id);
+}
+L?i: g?i this.drinkService.remove(id) nh?ng không await, và hàm không khai async.
+T?i sao sai: remove(id) trong service là hàm b?t ??ng b? (tr? Promise); không await, controller tr? 204 v? cho client ngay l?p t?c mà không ch? thao tác xóa d??i database hoàn t?t — response nói "?ã xóa xong" trong khi thao tác có th? ch?a ch?y xong ho?c fail âm th?m, gây race condition (g?i l?i GET ngay sau ?ó có th? v?n th?y d? li?u ch?a xóa).
+S?a l?i:
+@Delete(':id')
+@HttpCode(204)
+async remove(@Param('id') id: string) {
+  await this.drinkService.remove(id);
+}
+L?i s? 9
+@Module({
+  providers: [{ provide: DrinkService, useClass: MongooseDrinkRepository }],
+  controllers: [DrinkController],
+})
+export class DrinkModule {}
+L?i: bind sai token — provide: DrinkService l?i useClass: MongooseDrinkRepository, ??ng th?i DrinkService th?t và token DRINK_REPOSITORY không ???c ??ng ký.
+T?i sao sai: dòng này nói v?i Nest "ai xin token DrinkService thì ??a cho h? m?t instance MongooseDrinkRepository" — nh?m l?n hoàn toàn gi?a provider th?t (DrinkService, ch?a logic nghi?p v?) và implementation c?a repository. K?t qu?: DrinkController inject DrinkService s? nh?n nh?m m?t instance MongooseDrinkRepository (method không kh?p), còn token DRINK_REPOSITORY mà DrinkService c?n l?i không t?n t?i trong container ? l?i resolve dependency khi kh?i ??ng.
+S?a l?i:
+@Module({
+  providers: [
+    DrinkService,
+    { provide: DRINK_REPOSITORY, useClass: MongooseDrinkRepository },
+  ],
+  controllers: [DrinkController],
+})
+export class DrinkModule {}
+L?i s? 10
+@Injectable()
+export class DrinkService {
+  constructor(
+    @Inject(DRINK_REPOSITORY) private readonly repo: MongooseDrinkRepository,
+  ) {}
+}
+L?i: khai ki?u tham s? repo b?ng class c? th? MongooseDrinkRepository thay vì interface DrinkRepository.
+T?i sao sai: @Inject(DRINK_REPOSITORY) ?úng ? ph?n runtime (token), nh?ng khai ki?u compile-time là MongooseDrinkRepository làm m?t hoàn toàn seam mà token v?a t?o ra — TypeScript s? cho phép DrinkService g?i c? nh?ng method ch? có ? MongooseDrinkRepository (không có trong interface DrinkRepository), khi?n DrinkService vô tình ph? thu?c ng??c vào chi ti?t implementation c? th?. N?u sau này ??i sang implementation khác (InMemoryDrinkRepository ch?ng h?n), TypeScript s? không báo l?i biên d?ch dù DrinkService ?ang g?i method không t?n t?i ? implementation m?i.
+S?a l?i:
+@Injectable()
+export class DrinkService {
+  constructor(
+    @Inject(DRINK_REPOSITORY) private readonly repo: DrinkRepository,
+  ) {}
+}
