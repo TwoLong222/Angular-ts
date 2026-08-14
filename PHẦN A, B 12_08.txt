@@ -1,56 +1,56 @@
-B�i t?p v? nh� (NestJS) � S? 01: Recipe API + MongoDB
-Ph?n A � B�i gi?i l� thuy?t
-V? ki?n tr�c NestJS n�i chung
-1. @Injectable() cho ph�p Nest "t? t?o v� t? truy?n" m?t instance m� b?n kh�ng h? g?i new. C? ch? n�o ??ng sau chuy?n ?�?
-C? ch? ??ng sau l� Dependency Injection container (IoC container) c?a Nest. @Injectable() ?�nh d?u m?t class l� provider m� container c� quy?n qu?n l�. Khi ?ng d?ng kh?i ??ng, Nest ??c metadata c?a t?ng class (d?a tr�n design:paramtypes m� TypeScript sinh ra khi bi�n d?ch v?i decorator, qua reflect-metadata), d?ng th�nh m?t dependency graph, r?i t? g?i new theo ?�ng th? t? ph? thu?c (dependency ???c t?o tr??c, dependent t?o sau) v� l?u instance v�o container. Khi m?t class kh�c c?n n� � khai b�o trong constructor � Nest tra ?�ng token trong container v� t? "ti�m" instance v�o, kh�ng ai ph?i g?i new th? c�ng. ?�y ch�nh l� Inversion of Control: thay v� code t? t?o dependency c?a ch�nh n�, m?t th?c th? b�n ngo�i (container) ??ng ra t?o v� ti�m v�o. Container c�n qu?n l� lu�n v�ng ??i c?a instance (m?c ??nh l� singleton d�ng chung to�n app, ngo�i ra c�n c� request-scoped v� transient).
-2. M?t provider n?m trong providers nh?ng kh�ng n?m trong exports th� module kh�c import ???c x?y ra chuy?n g� khi c? inject n�? V� sao thi?t k? "m?c ??nh ?�ng" l?i an to�n h?n?
-N?u provider kh�ng c� trong exports, module kh�c d� ?� import module n�y r?i c? @Inject provider ?� v?n s? nh?n l?i ngay l�c kh?i ??ng ?ng d?ng (d?ng "Nest can't resolve dependencies..." v� provider ?� kh�ng ???c coi l� t?n t?i ??i v?i module ngo�i) � n� ch? l� chi ti?t n?i b? (private) c?a module khai b�o ra n�. exports ch�nh l� danh s�ch "public API" c?a module.
-Thi?t k? "m?c ??nh ?�ng, ph?i khai b�o m?i m?" an to�n h?n v� n� gi?i h?n di?n ti?p x�c (surface area): m?i module t? quy?t ??nh ph?n n�o c�ng khai, ph?n n�o gi? ri�ng ?? refactor t? do m� kh�ng s? ph� v? module kh�c ?ang ph? thu?c v�o chi ti?t n?i b? c?a n�. N?u m?c ??nh m?, m?i provider n?i b? ??u v� t�nh tr? th�nh h?p ??ng c�ng khai � s?a n?i b? module A c� th? �m th?m ph� module B, vi ph?m nguy�n t?c ?�ng g�i (encapsulation).
-3. V� sao logic nghi?p v? kh�ng n�n n?m trong Controller? N�u hai h?u qu? c? th? n?u vi?t th?ng code truy v?n database trong h�m x? l� route.
-Controller ch? n�n l� m?t t?ng m?ng (thin layer) ??m nhi?m vi?c "d?ch" giao th?c HTTP: nh?n request, map param/body, g?i service, tr? v? response/status code ?�ng. Hai h?u qu? c? th? n?u nh�t th?ng code truy v?n DB v�o route handler:
-� Kh�ng t�i s? d?ng ???c: n?u logic ?� c?n d�ng l?i ? n?i kh�c (m?t cron job, m?t resolver GraphQL, m?t CLI script), ph?i copy-paste l?i to�n b?, d? l?ch nhau khi s?a m?t ch? m� qu�n ch? kh�c.
-� Kh� test v� kh� b?o tr�: Controller g?n ch?t v?i Request/Response c?a framework, mu?n unit test logic nghi?p v? ??c l?p ph?i mock to�n b? t?ng HTTP; ??ng th?i khi logic ph�nh to, controller l?n l?n gi?a "??nh tuy?n" v� "nghi?p v?", kh� ??c, kh� review, v� kh�ng c�n seam n�o ?? ??i h? t?ng ph�a sau m� kh�ng ??ng v�o t?ng tr�nh b�y.
-V? REST API design (mang ?i ???c)
-4. T?o t�i nguy�n th�nh c�ng th??ng tr? 201, kh�ng ph?i 200. S? kh�c bi?t ?� n�i l�n ?i?u g�? Khi n�o POST v?n n�n tr? 200?
-201 Created n�i v?i client: "y�u c?u c?a b?n ?� sinh ra m?t resource m?i, v� ?�y l� resource ?�" � th??ng k�m theo payload/Location tr? t?i resource v?a t?o. 200 OK ch? n�i chung chung "x? l� th�nh c�ng", kh�ng cam k?t g� v? vi?c c� th?c th? m?i ra ??i hay kh�ng. Ph�n bi?t hai m� n�y gi�p client (nh?t l� code t? ??ng) bi?t ch?c c� entity m?i m� kh�ng c?n ?o�n qua n?i dung body.
-M?t POST v?n n�n tr? 200 khi n� kh�ng t?o t�i nguy�n m?i theo ngh?a CRUD m� ch? th?c thi m?t h�nh ??ng: POST /drinks/search (t�m ki?m ph?c t?p c?n g?i k�m body), POST /auth/login (??ng nh?p, tr? token), POST /orders/:id/cancel (thao t�c tr�n t�i nguy�n ?� t?n t?i s?n). Nh?ng tr??ng h?p n�y d�ng POST v� c?n g?i body, kh�ng ph?i v� ?ang sinh th?c th? m?i.
-5. V� sao id kh�ng t?n t?i v� id sai ??nh d?ng n�n c�ng tr? 404, thay v� c�i sau tr? 400?
-N?u id sai ??nh d?ng tr? 400, id ?�ng ??nh d?ng nh?ng kh�ng t?n t?i tr? 404, client b�n ngo�i s? v� t�nh bi?t ???c backend ?ang d�ng ki?u ??nh danh n�o (ObjectId c?a MongoDB, s? nguy�n t?ng d?n...) � m?t chi ti?t l?u tr? n?i b? kh�ng n�n r� ra qua h?p ??ng API. V?i client, "??nh d?ng id sai" v� "id kh�ng kh?p resource n�o" ??u d?n t?i c�ng m?t k?t lu?n: "kh�ng t�m th?y resource ? URI n�y" � t?c c�ng l� 404 Not Found. ?�y c?ng ch�nh l� l� do CastError c?a Mongoose ph?i ???c b?t v� chuy?n th�nh NotFoundException, thay v� ?? l?t ra th�nh 500.
-6. Quy t?c ch?n route param hay query param?
-Route param (:id) d�ng ?? ??nh danh m?t t�i nguy�n c? th?, duy nh?t trong kh�ng gian t�i nguy�n � v� d? /drinks/:id ngh?a l� "ch�nh resource n�o". Query param (?keyword=) d�ng ?? l?c/t�y ch?n tr�n m?t t?p h?p � v� d? /drinks?keyword=... ngh?a l� "trong t?p /drinks, l?c theo ?i?u ki?n g�". Quy t?c g?n: n?u thi?u gi� tr? ?� th� kh�ng c�n x�c ??nh ???c resource n�o � ?� l� route param, b?t bu?c v� n?m trong path; n?u thi?u gi� tr? ?� request v?n h?p l?, ch? tr? v? t?p r?ng h?n ho?c m?c ??nh � ?� l� query param, t�y ch?n v� kh�ng ph?i m?t ph?n ??nh danh t�i nguy�n.
-V? MongoDB / Mongoose (nguy�n t?c, kh�ng ph?i c� ph�p)
-7. N�u m?t t�nh hu?ng d? li?u m� m� h�nh document x? l� g?n h?n m� h�nh quan h?.
-V� d?: Recipe c� m?ng ingredients (m?i ingredient g?m t�n, s? l??ng, ??n v?). D? li?u n�y lu�n ???c ??c/ghi c�ng v?i Recipe cha, kh�ng bao gi? truy v?n ingredient ??c l?p t�ch kh?i c�ng th?c ch?a n�, v� s? l??ng ingredient trong m?t recipe th??ng nh?, g?n li?n v�ng ??i v?i recipe ?�. ? m� h�nh quan h?, ph?i t�ch th�nh b?ng ri�ng Ingredient c� kh�a ngo?i recipe_id, m?i l?n ??c m?t recipe ??y ?? ph?i JOIN hai b?ng. ? m� h�nh document, ingredients c� th? nh�ng th?ng (embed) l�m m?ng subdocument b�n trong document Recipe � ??c m?t l?n l� c� to�n b? d? li?u li�n quan, kh�ng c?n JOIN, ph?n �nh ?�ng th?c t? r?ng ingredient "thu?c v?" v� lu�n ?i c�ng recipe (quan h? composition ch?t, kh�ng ph?i association l?ng l?o).
-8. Mongoose Schema ?ang b?o v? ? t?ng n�o? L?i �ch c? th?? Th? g� kh�ng m?t ?i?
-Mongoose Schema b?o v? ? t?ng ?ng d?ng (application layer), kh�ng ph?i t?ng l?u tr?. MongoDB t? th�n ch?p nh?n b?t k? h�nh d?ng document n�o trong c�ng m?t collection, kh�ng ki?m tra g�. @Schema()/@Prop() l� l?p ki?m tra do Mongoose th?c hi?n tr??c khi l?nh ???c g?i xu?ng Mongo (ki?m tra required, ?�ng ki?u, cast d? li?u...).
-L?i �ch c? th?: b?t l?i s?m ngay t?i ?ng d?ng � v� d? thi?u field required b�o l?i ngay l�c .save(), ch? kh�ng ph?i l?u xong r?i m?i ph�t hi?n thi?u d? li?u khi ??c l?i; ??ng th?i TypeScript c� ki?u t?nh ?? g?i � v� b?t l?i l�c bi�n d?ch.
-Th? kh�ng m?t ?i: v?n gi? nguy�n t�nh linh ho?t c?a MongoDB � th�m field m?i v�o schema b?t c? l�c n�o c?ng ???c, kh�ng c?n ch?y migration ki?u ALTER TABLE nh? h? qu?n tr? quan h?, v� b?n th�n MongoDB ? t?ng l?u tr? v?n schema-less.
-9. V� sao kh�ng n�n tr? th?ng _id ra API m� c?n transform th�nh id? Li�n h? DTO.
-_id l� chi ti?t implementation c?a MongoDB (ki?u ObjectId, kh�ng ph?i ki?u d? li?u chu?n c?a JSON/REST) � tr? th?ng ra ngo�i ngh?a l� ?? l? lu�n vi?c backend ?ang d�ng MongoDB, v� b?t frontend ph?i hi?u kh�i ni?m ObjectId d� n� kh�ng li�n quan g� t?i nghi?p v?. Field c� g?ch d??i (_id) c?ng kh�ng t? nhi�n v?i quy ??c REST/JSON m� client th??ng mong ??i l� id.
-?�y ch�nh l� l� do DTO t?n t?i: DTO (Data Transfer Object) l� ranh gi?i t??ng minh gi?a "d? li?u n?i b? ?ng d?ng l?u tr? th? n�o" v� "d? li?u client nh�n th?y th? n�o" � kh�ng ?? chi ti?t b�n trong (c?u tr�c l?u tr?, ki?u d? li?u database, field n?i b?) r� r? th?ng ra h?p ??ng c�ng khai c?a API. transform trong toJSON ?�ng ?�ng vai tr� ?� ? chi?u output: d?ch _id (ObjectId) ? id (string) m?t l?n, ?�ng t?i bi�n gi?i gi?a app v� b�n ngo�i.
-10. findById("khong-hop-le") n�m CastError thay v� tr? null. H?u qu? n?u kh�ng b?t l?i, c�ch ph�ng tr�nh kh�ng c?n th? vi?n ngo�i?
-N?u kh�ng b?t l?i n�y: khi client g?i id sai ??nh d?ng, Mongoose n�m CastError ngay khi c? �p chu?i ?� th�nh ObjectId tr??c khi query. Kh�ng b?t ri�ng, b? exception filter m?c ??nh c?a Nest coi ?�y l� l?i kh�ng x�c ??nh v� tr? v? 500 Internal Server Error � sai ho�n to�n v? ng? ngh?a, v� ?�y th?c ch?t l� l?i ph�a client (id sai ??nh d?ng), ?�ng l? ph?i l� 404. Ngo�i ra 500 c�n l�m nhi?u log server b?i nh?ng "l?i" th?c ra ch? l� input kh�ng h?p l?.
-C�ch ph�ng tr�nh kh�ng c?n th? vi?n validate ngo�i: d�ng ti?n �ch c� s?n c?a Mongoose � Types.ObjectId.isValid(id) � ki?m tra ??nh d?ng id tr??c khi ??a v�o query; n?u kh�ng h?p l? th� coi nh? "kh�ng t�m th?y" v� tr? 404 ngay, kh�ng c?n ch?m t?i database.
-V? c?u h�nh (config) & kh?i ??ng ?ng d?ng
-11. V� sao connection string (ch?a m?t kh?u) ph?i n?m trong .env? M?t l� do b?o m?t, m?t l� do kh�ng li�n quan b?o m?t.
-� L� do b?o m?t: connection string ch?a m?t kh?u (v� c� th? c? user, host n?i b?); n?u hardcode trong code, m?t kh?u ?� s? n?m trong l?ch s? Git v?nh vi?n � k? c? x�a ? commit sau, n� v?n c�n trong history. Ch? c?n l? ??y code l�n m?t n?i c�ng khai (fork, backup, chia s? nh?m) l� l? m?t kh?u.
-� L� do kh�ng li�n quan b?o m?t: m?i m�i tr??ng (m�y c� nh�n, staging, production, m�y ??ng ??i) th??ng c?n tr? t?i database kh�c nhau. N?u hardcode, ??i m�i tr??ng ph?i s?a code v� build l?i � b?t ti?n v� d? l?i (v� d? qu�n ??i l?i tr??c khi deploy khi?n production tr? nh?m database dev). ?? trong .env cho ph�p ??i c?u h�nh ??c l?p v?i code, kh�ng c?n s?a/build l?i ?ng d?ng.
-12. onModuleInit() ch? seed khi countDocuments() === 0. M� t? c? th? n?u b? ?i?u ki?n ?� v� seed v� ?i?u ki?n m?i l?n kh?i ??ng l?i.
-M?i l?n app restart � k? c? restart t? ??ng do npm run start:dev ph�t hi?n ??i code l�c ?ang dev � insertMany(SEED_DRINKS) s? ch?y l?i v� ch�n th�m nguy�n b? d? li?u m?u v�o collection. V� c�c document m?i ???c sinh _id m?i (kh�ng tr�ng v?i document seed tr??c, n�n kh�ng b�o l?i duplicate key), d? li?u b? nh�n b?n sau m?i l?n restart: ch?y 5 l?n th� c� 15 m�n (3 m�n � 5) thay v� lu�n gi? ?�ng 3 m�n. V? l�u d�i, d? li?u test b? "r�c" d?n, vi?c test t�m ki?m/??m s? l??ng c?ng sai l?ch; n?u t�nh c? ch?y nh?m tr�n m�i tr??ng c� d? li?u th?t th� h�nh vi n�y c�n nguy hi?m h?n v� li�n t?c ch�n d? li?u gi? v�o database s?ng.
-V? Repository Pattern (n?i dung m?i c?a b�i n�y � Ph?n D)
-13. ??nh ngh?a "seam" b?ng l?i ri�ng. V� sao g?i th?ng Model<DrinkDocument> l� kh�ng c� seam, c�n g?i qua interface DrinkRepository l� c� seam?
-Seam (???ng n?i) l� m?t ?i?m trong ki?n tr�c code m� t?i ?� c� th? thay ??i m?t ph�a (implementation c? th?) m� ph�a c�n l?i (code g?i n�) kh�ng c?n bi?t v� kh�ng c?n s?a � ranh gi?i ???c c?t c� ch? ?�ch ?? hai b�n ch? giao ti?p qua m?t h?p ??ng (interface) c? ??nh, thay v� ph? thu?c tr?c ti?p v�o chi ti?t b�n trong c?a nhau.
-DrinkService g?i th?ng Model<DrinkDocument> l� kh�ng c� seam v� service l�c ?� bi?t ch�nh x�c n� ?ang n�i chuy?n v?i Mongoose � g?i .find(), .findById(), .exec()... l� API ri�ng c?a th? vi?n ?�. Mu?n ??i sang th? vi?n/database kh�c ph?i s?a t?ng d�ng b�n trong service.
-G?i qua interface DrinkRepository l� c� seam v� DrinkService ch? bi?t t?i h?p ??ng tr?u t??ng (findAll, findOne, create...), kh�ng bi?t implementation ph�a sau l� Mongoose, PostgreSQL hay m?t m?ng l?u t?m trong RAM. ??i implementation ch? c?n ??i ch? binding trong module, DrinkService kh�ng s?a m?t ch? n�o.
-14. Interface bi?n m?t sau khi compile. NestJS d?a v�o ?�u ?? bi?t "ai c?n c�i g�" l�c ch?y? Injection token gi?i quy?t th? n�o?
-NestJS d?a v�o injection token � m?t ??nh danh t?n t?i ???c ? runtime (chu?i, Symbol, ho?c ch�nh class) � ?? bi?t ai c?n c�i g�. V� interface ch? c� t�c d?ng l�c bi�n d?ch (type-checking) v� bi?n m?t ho�n to�n sau khi TypeScript compile ra JavaScript, Nest kh�ng th? "t�m theo t�n interface" khi ?ng d?ng ?ang ch?y.
-Gi?i ph�p: t?o m?t token thay m?t cho interface ?�, v� d? export const DRINK_REPOSITORY = Symbol('DRINK_REPOSITORY'), r?i ??ng k� trong providers c?a module b?ng { provide: DRINK_REPOSITORY, useClass: MongooseDrinkRepository } � n�i v?i container "ai xin token n�y th� ??a cho h? instance c?a MongooseDrinkRepository". N?i c?n d�ng, khai @Inject(DRINK_REPOSITORY) ?? n�i v?i runtime ?i t�m ?�ng token ?�, c�n ki?u TypeScript (: DrinkRepository) ch? d�ng ?? b�o compile-time class n�y ???c ph�p g?i nh?ng method n�o. Hai c? ch? � token cho runtime, ki?u cho compile-time � t?n t?i song song, ??c l?p nh?ng b? tr? nhau.
-15. ??i t? MongoDB sang PostgreSQL: c�ch vi?t "Service g?i th?ng Model" ph?i s?a bao nhi�u file? C�ch vi?t "qua interface + token" th� kh�c th? n�o?
-V?i c�ch vi?t "Service g?i th?ng Model c?a Mongoose": ph?i s?a DrinkService � t?c t?ng nghi?p v? (business logic layer) � v� m?i l?i g?i .find(), .findById(), .exec(), c� ph�p regex t�m ki?m... ??u n?m ngay trong service ?�. Ngo�i ra c�n ph?i s?a c? schema/model definition (drink.entity.ts, DrinkSchema) v� ?� l� kh�i ni?m ri�ng c?a Mongoose, v� c� nguy c? ph?i s?a c? file test v� ch�ng mock tr?c ti?p Model c?a Mongoose. S? file c?n s?a t? l? v?i s? n?i service g?i tr?c ti?p API c?a Mongoose.
-V?i c�ch vi?t "qua interface + token": ch? c?n vi?t th�m m?t implementation m?i ? t?ng h? t?ng (v� d? PostgresDrinkRepository implements DrinkRepository), r?i ??i ?�ng m?t d�ng binding trong module ({ provide: DRINK_REPOSITORY, useClass: PostgresDrinkRepository }). DrinkService (t?ng nghi?p v?) v� DrinkController (t?ng tr�nh b�y/HTTP) kh�ng b? ??ng t?i m?t d�ng n�o, v� ch�ng ch? ph? thu?c v�o interface DrinkRepository ch? kh�ng ph? thu?c v�o Mongoose. ?�y ch�nh l� gi� tr? th?c ti?n c?a seam: gi?i h?n ph?m vi ?nh h??ng c?a m?t thay ??i h? t?ng l?n xu?ng ch? c�n m?t t?ng duy nh?t.
+Bài tập về nhà (NestJS) — Số 01: Recipe API + MongoDB
+Phần A — Bài giải lý thuyết
+Về kiến trúc NestJS nói chung
+1. @Injectable() cho phép Nest "tự tạo và tự truyền" một instance mà bạn không hề gọi new. Cơ chế nào đứng sau chuyện đó?
+Cơ chế đứng sau là Dependency Injection container (IoC container) của Nest. @Injectable() đánh dấu một class là provider mà container có quyền quản lý. Khi ứng dụng khởi động, Nest đọc metadata của từng class (dựa trên design:paramtypes mà TypeScript sinh ra khi biên dịch với decorator, qua reflect-metadata), dựng thành một dependency graph, rồi tự gọi new theo đúng thứ tự phụ thuộc (dependency được tạo trước, dependent tạo sau) và lưu instance vào container. Khi một class khác cần nó — khai báo trong constructor — Nest tra đúng token trong container và tự "tiêm" instance vào, không ai phải gọi new thủ công. Đây chính là Inversion of Control: thay vì code tự tạo dependency của chính nó, một thực thể bên ngoài (container) đứng ra tạo và tiêm vào. Container còn quản lý luôn vòng đời của instance (mặc định là singleton dùng chung toàn app, ngoài ra còn có request-scoped và transient).
+2. Một provider nằm trong providers nhưng không nằm trong exports thì module khác import được xảy ra chuyện gì khi cố inject nó? Vì sao thiết kế "mặc định đóng" lại an toàn hơn?
+Nếu provider không có trong exports, module khác dù đã import module này rồi cố @Inject provider đó vẫn sẽ nhận lỗi ngay lúc khởi động ứng dụng (dạng "Nest can't resolve dependencies..." vì provider đó không được coi là tồn tại đối với module ngoài) — nó chỉ là chi tiết nội bộ (private) của module khai báo ra nó. exports chính là danh sách "public API" của module.
+Thiết kế "mặc định đóng, phải khai báo mới mở" an toàn hơn vì nó giới hạn diện tiếp xúc (surface area): mỗi module tự quyết định phần nào công khai, phần nào giữ riêng để refactor tự do mà không sợ phá vỡ module khác đang phụ thuộc vào chi tiết nội bộ của nó. Nếu mặc định mở, mọi provider nội bộ đều vô tình trở thành hợp đồng công khai — sửa nội bộ module A có thể âm thầm phá module B, vi phạm nguyên tắc đóng gói (encapsulation).
+3. Vì sao logic nghiệp vụ không nên nằm trong Controller? Nêu hai hậu quả cụ thể nếu viết thẳng code truy vấn database trong hàm xử lý route.
+Controller chỉ nên là một tầng mỏng (thin layer) đảm nhiệm việc "dịch" giao thức HTTP: nhận request, map param/body, gọi service, trả về response/status code đúng. Hai hậu quả cụ thể nếu nhét thẳng code truy vấn DB vào route handler:
+•	Không tái sử dụng được: nếu logic đó cần dùng lại ở nơi khác (một cron job, một resolver GraphQL, một CLI script), phải copy-paste lại toàn bộ, dễ lệch nhau khi sửa một chỗ mà quên chỗ khác.
+•	Khó test và khó bảo trì: Controller gắn chặt với Request/Response của framework, muốn unit test logic nghiệp vụ độc lập phải mock toàn bộ tầng HTTP; đồng thời khi logic phình to, controller lẫn lộn giữa "định tuyến" và "nghiệp vụ", khó đọc, khó review, và không còn seam nào để đổi hạ tầng phía sau mà không đụng vào tầng trình bày.
+Về REST API design (mang đi được)
+4. Tạo tài nguyên thành công thường trả 201, không phải 200. Sự khác biệt đó nói lên điều gì? Khi nào POST vẫn nên trả 200?
+201 Created nói với client: "yêu cầu của bạn đã sinh ra một resource mới, và đây là resource đó" — thường kèm theo payload/Location trỏ tới resource vừa tạo. 200 OK chỉ nói chung chung "xử lý thành công", không cam kết gì về việc có thực thể mới ra đời hay không. Phân biệt hai mã này giúp client (nhất là code tự động) biết chắc có entity mới mà không cần đoán qua nội dung body.
+Một POST vẫn nên trả 200 khi nó không tạo tài nguyên mới theo nghĩa CRUD mà chỉ thực thi một hành động: POST /drinks/search (tìm kiếm phức tạp cần gửi kèm body), POST /auth/login (đăng nhập, trả token), POST /orders/:id/cancel (thao tác trên tài nguyên đã tồn tại sẵn). Những trường hợp này dùng POST vì cần gửi body, không phải vì đang sinh thực thể mới.
+5. Vì sao id không tồn tại và id sai định dạng nên cùng trả 404, thay vì cái sau trả 400?
+Nếu id sai định dạng trả 400, id đúng định dạng nhưng không tồn tại trả 404, client bên ngoài sẽ vô tình biết được backend đang dùng kiểu định danh nào (ObjectId của MongoDB, số nguyên tăng dần...) — một chi tiết lưu trữ nội bộ không nên rò ra qua hợp đồng API. Với client, "định dạng id sai" và "id không khớp resource nào" đều dẫn tới cùng một kết luận: "không tìm thấy resource ở URI này" — tức cùng là 404 Not Found. Đây cũng chính là lý do CastError của Mongoose phải được bắt và chuyển thành NotFoundException, thay vì để lọt ra thành 500.
+6. Quy tắc chọn route param hay query param?
+Route param (:id) dùng để định danh một tài nguyên cụ thể, duy nhất trong không gian tài nguyên — ví dụ /drinks/:id nghĩa là "chính resource nào". Query param (?keyword=) dùng để lọc/tùy chọn trên một tập hợp — ví dụ /drinks?keyword=... nghĩa là "trong tập /drinks, lọc theo điều kiện gì". Quy tắc gọn: nếu thiếu giá trị đó thì không còn xác định được resource nào — đó là route param, bắt buộc và nằm trong path; nếu thiếu giá trị đó request vẫn hợp lệ, chỉ trả về tập rộng hơn hoặc mặc định — đó là query param, tùy chọn và không phải một phần định danh tài nguyên.
+Về MongoDB / Mongoose (nguyên tắc, không phải cú pháp)
+7. Nêu một tình huống dữ liệu mà mô hình document xử lý gọn hơn mô hình quan hệ.
+Ví dụ: Recipe có mảng ingredients (mỗi ingredient gồm tên, số lượng, đơn vị). Dữ liệu này luôn được đọc/ghi cùng với Recipe cha, không bao giờ truy vấn ingredient độc lập tách khỏi công thức chứa nó, và số lượng ingredient trong một recipe thường nhỏ, gắn liền vòng đời với recipe đó. Ở mô hình quan hệ, phải tách thành bảng riêng Ingredient có khóa ngoại recipe_id, mỗi lần đọc một recipe đầy đủ phải JOIN hai bảng. Ở mô hình document, ingredients có thể nhúng thẳng (embed) làm mảng subdocument bên trong document Recipe — đọc một lần là có toàn bộ dữ liệu liên quan, không cần JOIN, phản ánh đúng thực tế rằng ingredient "thuộc về" và luôn đi cùng recipe (quan hệ composition chặt, không phải association lỏng lẻo).
+8. Mongoose Schema đang bảo vệ ở tầng nào? Lợi ích cụ thể? Thứ gì không mất đi?
+Mongoose Schema bảo vệ ở tầng ứng dụng (application layer), không phải tầng lưu trữ. MongoDB tự thân chấp nhận bất kỳ hình dạng document nào trong cùng một collection, không kiểm tra gì. @Schema()/@Prop() là lớp kiểm tra do Mongoose thực hiện trước khi lệnh được gửi xuống Mongo (kiểm tra required, đúng kiểu, cast dữ liệu...).
+Lợi ích cụ thể: bắt lỗi sớm ngay tại ứng dụng — ví dụ thiếu field required báo lỗi ngay lúc .save(), chứ không phải lưu xong rồi mới phát hiện thiếu dữ liệu khi đọc lại; đồng thời TypeScript có kiểu tĩnh để gợi ý và bắt lỗi lúc biên dịch.
+Thứ không mất đi: vẫn giữ nguyên tính linh hoạt của MongoDB — thêm field mới vào schema bất cứ lúc nào cũng được, không cần chạy migration kiểu ALTER TABLE như hệ quản trị quan hệ, vì bản thân MongoDB ở tầng lưu trữ vẫn schema-less.
+9. Vì sao không nên trả thẳng _id ra API mà cần transform thành id? Liên hệ DTO.
+_id là chi tiết implementation của MongoDB (kiểu ObjectId, không phải kiểu dữ liệu chuẩn của JSON/REST) — trả thẳng ra ngoài nghĩa là để lộ luôn việc backend đang dùng MongoDB, và bắt frontend phải hiểu khái niệm ObjectId dù nó không liên quan gì tới nghiệp vụ. Field có gạch dưới (_id) cũng không tự nhiên với quy ước REST/JSON mà client thường mong đợi là id.
+Đây chính là lý do DTO tồn tại: DTO (Data Transfer Object) là ranh giới tường minh giữa "dữ liệu nội bộ ứng dụng lưu trữ thế nào" và "dữ liệu client nhìn thấy thế nào" — không để chi tiết bên trong (cấu trúc lưu trữ, kiểu dữ liệu database, field nội bộ) rò rỉ thẳng ra hợp đồng công khai của API. transform trong toJSON đóng đúng vai trò đó ở chiều output: dịch _id (ObjectId) → id (string) một lần, đúng tại biên giới giữa app và bên ngoài.
+10. findById("khong-hop-le") ném CastError thay vì trả null. Hậu quả nếu không bắt lỗi, cách phòng tránh không cần thư viện ngoài?
+Nếu không bắt lỗi này: khi client gửi id sai định dạng, Mongoose ném CastError ngay khi cố ép chuỗi đó thành ObjectId trước khi query. Không bắt riêng, bộ exception filter mặc định của Nest coi đây là lỗi không xác định và trả về 500 Internal Server Error — sai hoàn toàn về ngữ nghĩa, vì đây thực chất là lỗi phía client (id sai định dạng), đáng lẽ phải là 404. Ngoài ra 500 còn làm nhiễu log server bởi những "lỗi" thực ra chỉ là input không hợp lệ.
+Cách phòng tránh không cần thư viện validate ngoài: dùng tiện ích có sẵn của Mongoose — Types.ObjectId.isValid(id) — kiểm tra định dạng id trước khi đưa vào query; nếu không hợp lệ thì coi như "không tìm thấy" và trả 404 ngay, không cần chạm tới database.
+Về cấu hình (config) & khởi động ứng dụng
+11. Vì sao connection string (chứa mật khẩu) phải nằm trong .env? Một lý do bảo mật, một lý do không liên quan bảo mật.
+•	Lý do bảo mật: connection string chứa mật khẩu (và có thể cả user, host nội bộ); nếu hardcode trong code, mật khẩu đó sẽ nằm trong lịch sử Git vĩnh viễn — kể cả xóa ở commit sau, nó vẫn còn trong history. Chỉ cần lỡ đẩy code lên một nơi công khai (fork, backup, chia sẻ nhầm) là lộ mật khẩu.
+•	Lý do không liên quan bảo mật: mỗi môi trường (máy cá nhân, staging, production, máy đồng đội) thường cần trỏ tới database khác nhau. Nếu hardcode, đổi môi trường phải sửa code và build lại — bất tiện và dễ lỗi (ví dụ quên đổi lại trước khi deploy khiến production trỏ nhầm database dev). Để trong .env cho phép đổi cấu hình độc lập với code, không cần sửa/build lại ứng dụng.
+12. onModuleInit() chỉ seed khi countDocuments() === 0. Mô tả cụ thể nếu bỏ điều kiện đó và seed vô điều kiện mỗi lần khởi động lại.
+Mỗi lần app restart — kể cả restart tự động do npm run start:dev phát hiện đổi code lúc đang dev — insertMany(SEED_DRINKS) sẽ chạy lại và chèn thêm nguyên bộ dữ liệu mẫu vào collection. Vì các document mới được sinh _id mới (không trùng với document seed trước, nên không báo lỗi duplicate key), dữ liệu bị nhân bản sau mỗi lần restart: chạy 5 lần thì có 15 món (3 món × 5) thay vì luôn giữ đúng 3 món. Về lâu dài, dữ liệu test bị "rác" dần, việc test tìm kiếm/đếm số lượng cũng sai lệch; nếu tình cờ chạy nhầm trên môi trường có dữ liệu thật thì hành vi này còn nguy hiểm hơn vì liên tục chèn dữ liệu giả vào database sống.
+Về Repository Pattern (nội dung mới của bài này — Phần D)
+13. Định nghĩa "seam" bằng lời riêng. Vì sao gọi thẳng Model<DrinkDocument> là không có seam, còn gọi qua interface DrinkRepository là có seam?
+Seam (đường nối) là một điểm trong kiến trúc code mà tại đó có thể thay đổi một phía (implementation cụ thể) mà phía còn lại (code gọi nó) không cần biết và không cần sửa — ranh giới được cắt có chủ đích để hai bên chỉ giao tiếp qua một hợp đồng (interface) cố định, thay vì phụ thuộc trực tiếp vào chi tiết bên trong của nhau.
+DrinkService gọi thẳng Model<DrinkDocument> là không có seam vì service lúc đó biết chính xác nó đang nói chuyện với Mongoose — gọi .find(), .findById(), .exec()... là API riêng của thư viện đó. Muốn đổi sang thư viện/database khác phải sửa từng dòng bên trong service.
+Gọi qua interface DrinkRepository là có seam vì DrinkService chỉ biết tới hợp đồng trừu tượng (findAll, findOne, create...), không biết implementation phía sau là Mongoose, PostgreSQL hay một mảng lưu tạm trong RAM. Đổi implementation chỉ cần đổi chỗ binding trong module, DrinkService không sửa một chữ nào.
+14. Interface biến mất sau khi compile. NestJS dựa vào đâu để biết "ai cần cái gì" lúc chạy? Injection token giải quyết thế nào?
+NestJS dựa vào injection token — một định danh tồn tại được ở runtime (chuỗi, Symbol, hoặc chính class) — để biết ai cần cái gì. Vì interface chỉ có tác dụng lúc biên dịch (type-checking) và biến mất hoàn toàn sau khi TypeScript compile ra JavaScript, Nest không thể "tìm theo tên interface" khi ứng dụng đang chạy.
+Giải pháp: tạo một token thay mặt cho interface đó, ví dụ export const DRINK_REPOSITORY = Symbol('DRINK_REPOSITORY'), rồi đăng ký trong providers của module bằng { provide: DRINK_REPOSITORY, useClass: MongooseDrinkRepository } — nói với container "ai xin token này thì đưa cho họ instance của MongooseDrinkRepository". Nơi cần dùng, khai @Inject(DRINK_REPOSITORY) để nói với runtime đi tìm đúng token đó, còn kiểu TypeScript (: DrinkRepository) chỉ dùng để báo compile-time class này được phép gọi những method nào. Hai cơ chế — token cho runtime, kiểu cho compile-time — tồn tại song song, độc lập nhưng bổ trợ nhau.
+15. Đổi từ MongoDB sang PostgreSQL: cách viết "Service gọi thẳng Model" phải sửa bao nhiêu file? Cách viết "qua interface + token" thì khác thế nào?
+Với cách viết "Service gọi thẳng Model của Mongoose": phải sửa DrinkService — tức tầng nghiệp vụ (business logic layer) — vì mọi lời gọi .find(), .findById(), .exec(), cú pháp regex tìm kiếm... đều nằm ngay trong service đó. Ngoài ra còn phải sửa cả schema/model definition (drink.entity.ts, DrinkSchema) vì đó là khái niệm riêng của Mongoose, và có nguy cơ phải sửa cả file test vì chúng mock trực tiếp Model của Mongoose. Số file cần sửa tỉ lệ với số nơi service gọi trực tiếp API của Mongoose.
+Với cách viết "qua interface + token": chỉ cần viết thêm một implementation mới ở tầng hạ tầng (ví dụ PostgresDrinkRepository implements DrinkRepository), rồi đổi đúng một dòng binding trong module ({ provide: DRINK_REPOSITORY, useClass: PostgresDrinkRepository }). DrinkService (tầng nghiệp vụ) và DrinkController (tầng trình bày/HTTP) không bị đụng tới một dòng nào, vì chúng chỉ phụ thuộc vào interface DrinkRepository chứ không phụ thuộc vào Mongoose. Đây chính là giá trị thực tiễn của seam: giới hạn phạm vi ảnh hưởng của một thay đổi hạ tầng lớn xuống chỉ còn một tầng duy nhất.
 
-Ph?n B � T�m l?i trong code
-L?i s? 1
+Phần B — Tìm lỗi trong code
+Lỗi số 1
 @Injectable()
 export class DrinkService {
   constructor(private readonly drinkModel: Model<DrinkDocument>) {}
@@ -59,25 +59,25 @@ export class DrinkService {
     return this.drinkModel.find().exec();
   }
 }
-L?i: thi?u decorator @InjectModel(Drink.name) tr??c tham s? drinkModel trong constructor.
-T?i sao sai: Nest DI ho?t ??ng d?a tr�n token ? runtime. Model<DrinkDocument> ch? l� m?t ki?u TypeScript, bi?n m?t sau khi compile � Nest kh�ng t? bi?t ph?i l?y Mongoose Model n�o ?? ti�m v�o n?u thi?u token t??ng minh. Thi?u @InjectModel, Nest kh�ng t�m ???c provider ph� h?p cho tham s? n�y v� n�m l?i "Nest can't resolve dependencies of DrinkService" ngay khi kh?i ??ng ?ng d?ng.
-S?a l?i:
+Lỗi: thiếu decorator @InjectModel(Drink.name) trước tham số drinkModel trong constructor.
+Tại sao sai: Nest DI hoạt động dựa trên token ở runtime. Model<DrinkDocument> chỉ là một kiểu TypeScript, biến mất sau khi compile — Nest không tự biết phải lấy Mongoose Model nào để tiêm vào nếu thiếu token tường minh. Thiếu @InjectModel, Nest không tìm được provider phù hợp cho tham số này và ném lỗi "Nest can't resolve dependencies of DrinkService" ngay khi khởi động ứng dụng.
+Sửa lại:
 constructor(
   @InjectModel(Drink.name) private readonly drinkModel: Model<DrinkDocument>,
 ) {}
-L?i s? 2
+Lỗi số 2
 @Get(':id')
 findOne(@Param('id') id: string) {
   return this.drinkService.findOne(+id);
 }
-L?i: d�ng +id ?? �p id th�nh s? tr??c khi truy?n v�o service.
-T?i sao sai: id c?a MongoDB l� ObjectId, bi?u di?n d??i d?ng chu?i hex 24 k� t? (v� d? "507f191e810c19729de860ea"), kh�ng ph?i s? nguy�n. +id cho ra NaN v?i h?u h?t id th?t, khi?n service lu�n t�m v?i gi� tr? sai.
-S?a l?i:
+Lỗi: dùng +id để ép id thành số trước khi truyền vào service.
+Tại sao sai: id của MongoDB là ObjectId, biểu diễn dưới dạng chuỗi hex 24 ký tự (ví dụ "507f191e810c19729de860ea"), không phải số nguyên. +id cho ra NaN với hầu hết id thật, khiến service luôn tìm với giá trị sai.
+Sửa lại:
 @Get(':id')
 findOne(@Param('id') id: string) {
   return this.drinkService.findOne(id);
 }
-L?i s? 3
+Lỗi số 3
 async findOne(id: string): Promise<Drink> {
   const drink = await this.drinkModel.findById(id).exec();
   if (!drink) {
@@ -85,9 +85,9 @@ async findOne(id: string): Promise<Drink> {
   }
   return drink;
 }
-L?i: g?i th?ng findById(id) m� kh�ng ki?m tra ??nh d?ng id tr??c b?ng Types.ObjectId.isValid(id).
-T?i sao sai: n?u id c� ??nh d?ng kh�ng h?p l?, Mongoose n�m CastError ngay khi c? �p id sang ObjectId � kh�c h?n v?i vi?c tr? v? null nh? "kh�ng t�m th?y". Kh�ng b?t ri�ng, Nest coi ?�y l� l?i kh�ng x�c ??nh v� tr? 500 Internal Server Error, trong khi b?n ch?t ch? l� input sai ??nh d?ng t? client, ?�ng l? ph?i l� 404.
-S?a l?i:
+Lỗi: gọi thẳng findById(id) mà không kiểm tra định dạng id trước bằng Types.ObjectId.isValid(id).
+Tại sao sai: nếu id có định dạng không hợp lệ, Mongoose ném CastError ngay khi cố ép id sang ObjectId — khác hẳn với việc trả về null như "không tìm thấy". Không bắt riêng, Nest coi đây là lỗi không xác định và trả 500 Internal Server Error, trong khi bản chất chỉ là input sai định dạng từ client, đáng lẽ phải là 404.
+Sửa lại:
 async findOne(id: string): Promise<Drink> {
   const drink = Types.ObjectId.isValid(id)
     ? await this.drinkModel.findById(id).exec()
@@ -97,20 +97,20 @@ async findOne(id: string): Promise<Drink> {
   }
   return drink;
 }
-L?i s? 4
+Lỗi số 4
 async onModuleInit(): Promise<void> {
   await this.drinkModel.insertMany(SEED_DRINKS);
 }
-L?i: seed v� ?i?u ki?n, thi?u ki?m tra countDocuments() === 0.
-T?i sao sai: onModuleInit() ch?y m?i l?n ?ng d?ng kh?i ??ng, k? c? khi t? restart do thay ??i code l�c dev (npm run start:dev). Kh�ng c� ?i?u ki?n, m?i l?n kh?i ??ng l?i s? ch�n th�m m?t b? SEED_DRINKS m?i (v?i _id m?i n�n kh�ng b�o l?i duplicate), khi?n d? li?u b? nh�n b?n li�n t?c.
-S?a l?i:
+Lỗi: seed vô điều kiện, thiếu kiểm tra countDocuments() === 0.
+Tại sao sai: onModuleInit() chạy mỗi lần ứng dụng khởi động, kể cả khi tự restart do thay đổi code lúc dev (npm run start:dev). Không có điều kiện, mỗi lần khởi động lại sẽ chèn thêm một bộ SEED_DRINKS mới (với _id mới nên không báo lỗi duplicate), khiến dữ liệu bị nhân bản liên tục.
+Sửa lại:
 async onModuleInit(): Promise<void> {
   const count = await this.drinkModel.countDocuments();
   if (count === 0) {
     await this.drinkModel.insertMany(SEED_DRINKS);
   }
 }
-L?i s? 5
+Lỗi số 5
 @Schema()
 export class Drink {
   @Prop({ required: true })
@@ -119,9 +119,9 @@ export class Drink {
   @Prop({ type: [ToppingSchema], default: [] })
   toppings!: Topping[];
 }
-L?i: thi?u c?u h�nh toJSON.transform trong @Schema().
-T?i sao sai: kh�ng c� transform, khi tr? document ra JSON, client nh?n th?ng field _id (ki?u ObjectId) v� __v (version key n?i b? c?a Mongoose) � ?? l? chi ti?t implementation c?a MongoDB/Mongoose ra t?n API c�ng khai, ng??c nguy�n t?c DTO / ranh gi?i app�b�n ngo�i.
-S?a l?i:
+Lỗi: thiếu cấu hình toJSON.transform trong @Schema().
+Tại sao sai: không có transform, khi trả document ra JSON, client nhận thẳng field _id (kiểu ObjectId) và __v (version key nội bộ của Mongoose) — để lộ chi tiết implementation của MongoDB/Mongoose ra tận API công khai, ngược nguyên tắc DTO / ranh giới app–bên ngoài.
+Sửa lại:
 @Schema({
   toJSON: {
     virtuals: true,
@@ -139,7 +139,7 @@ export class Drink {
   @Prop({ type: [ToppingSchema], default: [] })
   toppings!: Topping[];
 }
-L?i s? 6
+Lỗi số 6
 @Schema()
 export class Topping {
   @Prop({ required: true })
@@ -149,9 +149,9 @@ export class Topping {
   quantity!: number;
 }
 export const ToppingSchema = SchemaFactory.createForClass(Topping);
-L?i: Topping l� subdocument (nh�ng trong m?ng toppings c?a Drink) nh?ng @Schema() thi?u t�y ch?n { _id: false }.
-T?i sao sai: m?c ??nh Mongoose t? sinh m?t _id ri�ng cho m?i subdocument trong m?ng, d� Topping kh�ng bao gi? ???c truy v?n/tham chi?u ??c l?p nh? m?t entity ri�ng � n� ch? l� d? li?u g?n li?n v?i Drink cha. Sinh _id th?a v?a l�ng ph�, v?a g�y hi?u l?m r?ng topping l� resource ??c l?p truy c?p ???c b?ng id ri�ng.
-S?a l?i:
+Lỗi: Topping là subdocument (nhúng trong mảng toppings của Drink) nhưng @Schema() thiếu tùy chọn { _id: false }.
+Tại sao sai: mặc định Mongoose tự sinh một _id riêng cho mỗi subdocument trong mảng, dù Topping không bao giờ được truy vấn/tham chiếu độc lập như một entity riêng — nó chỉ là dữ liệu gắn liền với Drink cha. Sinh _id thừa vừa lãng phí, vừa gây hiểu lầm rằng topping là resource độc lập truy cập được bằng id riêng.
+Sửa lại:
 @Schema({ _id: false })
 export class Topping {
   @Prop({ required: true })
@@ -161,7 +161,7 @@ export class Topping {
   quantity!: number;
 }
 export const ToppingSchema = SchemaFactory.createForClass(Topping);
-L?i s? 7
+Lỗi số 7
 @Module({
   imports: [
     MongooseModule.forRootAsync({
@@ -170,9 +170,9 @@ L?i s? 7
   ],
 })
 export class AppModule {}
-L?i: ??c process.env.MONGODB_URI tr?c ti?p trong useFactory, kh�ng qua ConfigService.
-T?i sao sai: ??c th?ng process.env b? qua to�n b? l?p tr?u t??ng m� ConfigModule cung c?p (validate bi?n m�i tr??ng, gi� tr? m?c ??nh, n?p .env nh?t qu�n); ngo�i ra useFactory kh�ng khai inject: [ConfigService] n�n Nest kh�ng ??m b?o ConfigModule ?� n?p xong .env tr??c khi factory n�y ch?y, c� th? khi?n URI l� undefined.
-S?a l?i:
+Lỗi: đọc process.env.MONGODB_URI trực tiếp trong useFactory, không qua ConfigService.
+Tại sao sai: đọc thẳng process.env bỏ qua toàn bộ lớp trừu tượng mà ConfigModule cung cấp (validate biến môi trường, giá trị mặc định, nạp .env nhất quán); ngoài ra useFactory không khai inject: [ConfigService] nên Nest không đảm bảo ConfigModule đã nạp xong .env trước khi factory này chạy, có thể khiến URI là undefined.
+Sửa lại:
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
@@ -185,29 +185,29 @@ S?a l?i:
   ],
 })
 export class AppModule {}
-L?i s? 8
+Lỗi số 8
 @Delete(':id')
 @HttpCode(204)
 remove(@Param('id') id: string) {
   this.drinkService.remove(id);
 }
-L?i: g?i this.drinkService.remove(id) nh?ng kh�ng await, v� h�m kh�ng khai async.
-T?i sao sai: remove(id) trong service l� h�m b?t ??ng b? (tr? Promise); kh�ng await, controller tr? 204 v? cho client ngay l?p t?c m� kh�ng ch? thao t�c x�a d??i database ho�n t?t � response n�i "?� x�a xong" trong khi thao t�c c� th? ch?a ch?y xong ho?c fail �m th?m, g�y race condition (g?i l?i GET ngay sau ?� c� th? v?n th?y d? li?u ch?a x�a).
-S?a l?i:
+Lỗi: gọi this.drinkService.remove(id) nhưng không await, và hàm không khai async.
+Tại sao sai: remove(id) trong service là hàm bất đồng bộ (trả Promise); không await, controller trả 204 về cho client ngay lập tức mà không chờ thao tác xóa dưới database hoàn tất — response nói "đã xóa xong" trong khi thao tác có thể chưa chạy xong hoặc fail âm thầm, gây race condition (gọi lại GET ngay sau đó có thể vẫn thấy dữ liệu chưa xóa).
+Sửa lại:
 @Delete(':id')
 @HttpCode(204)
 async remove(@Param('id') id: string) {
   await this.drinkService.remove(id);
 }
-L?i s? 9
+Lỗi số 9
 @Module({
   providers: [{ provide: DrinkService, useClass: MongooseDrinkRepository }],
   controllers: [DrinkController],
 })
 export class DrinkModule {}
-L?i: bind sai token � provide: DrinkService l?i useClass: MongooseDrinkRepository, ??ng th?i DrinkService th?t v� token DRINK_REPOSITORY kh�ng ???c ??ng k�.
-T?i sao sai: d�ng n�y n�i v?i Nest "ai xin token DrinkService th� ??a cho h? m?t instance MongooseDrinkRepository" � nh?m l?n ho�n to�n gi?a provider th?t (DrinkService, ch?a logic nghi?p v?) v� implementation c?a repository. K?t qu?: DrinkController inject DrinkService s? nh?n nh?m m?t instance MongooseDrinkRepository (method kh�ng kh?p), c�n token DRINK_REPOSITORY m� DrinkService c?n l?i kh�ng t?n t?i trong container ? l?i resolve dependency khi kh?i ??ng.
-S?a l?i:
+Lỗi: bind sai token — provide: DrinkService lại useClass: MongooseDrinkRepository, đồng thời DrinkService thật và token DRINK_REPOSITORY không được đăng ký.
+Tại sao sai: dòng này nói với Nest "ai xin token DrinkService thì đưa cho họ một instance MongooseDrinkRepository" — nhầm lẫn hoàn toàn giữa provider thật (DrinkService, chứa logic nghiệp vụ) và implementation của repository. Kết quả: DrinkController inject DrinkService sẽ nhận nhầm một instance MongooseDrinkRepository (method không khớp), còn token DRINK_REPOSITORY mà DrinkService cần lại không tồn tại trong container → lỗi resolve dependency khi khởi động.
+Sửa lại:
 @Module({
   providers: [
     DrinkService,
@@ -216,16 +216,16 @@ S?a l?i:
   controllers: [DrinkController],
 })
 export class DrinkModule {}
-L?i s? 10
+Lỗi số 10
 @Injectable()
 export class DrinkService {
   constructor(
     @Inject(DRINK_REPOSITORY) private readonly repo: MongooseDrinkRepository,
   ) {}
 }
-L?i: khai ki?u tham s? repo b?ng class c? th? MongooseDrinkRepository thay v� interface DrinkRepository.
-T?i sao sai: @Inject(DRINK_REPOSITORY) ?�ng ? ph?n runtime (token), nh?ng khai ki?u compile-time l� MongooseDrinkRepository l�m m?t ho�n to�n seam m� token v?a t?o ra � TypeScript s? cho ph�p DrinkService g?i c? nh?ng method ch? c� ? MongooseDrinkRepository (kh�ng c� trong interface DrinkRepository), khi?n DrinkService v� t�nh ph? thu?c ng??c v�o chi ti?t implementation c? th?. N?u sau n�y ??i sang implementation kh�c (InMemoryDrinkRepository ch?ng h?n), TypeScript s? kh�ng b�o l?i bi�n d?ch d� DrinkService ?ang g?i method kh�ng t?n t?i ? implementation m?i.
-S?a l?i:
+Lỗi: khai kiểu tham số repo bằng class cụ thể MongooseDrinkRepository thay vì interface DrinkRepository.
+Tại sao sai: @Inject(DRINK_REPOSITORY) đúng ở phần runtime (token), nhưng khai kiểu compile-time là MongooseDrinkRepository làm mất hoàn toàn seam mà token vừa tạo ra — TypeScript sẽ cho phép DrinkService gọi cả những method chỉ có ở MongooseDrinkRepository (không có trong interface DrinkRepository), khiến DrinkService vô tình phụ thuộc ngược vào chi tiết implementation cụ thể. Nếu sau này đổi sang implementation khác (InMemoryDrinkRepository chẳng hạn), TypeScript sẽ không báo lỗi biên dịch dù DrinkService đang gọi method không tồn tại ở implementation mới.
+Sửa lại:
 @Injectable()
 export class DrinkService {
   constructor(
